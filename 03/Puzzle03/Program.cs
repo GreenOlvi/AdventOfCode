@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
+using System.Linq;
 
 namespace Puzzle03
 {
@@ -13,10 +11,28 @@ namespace Puzzle03
         {
             foreach (var filename in args)
             {
-                var navi = Navigate(GetDirections(filename));
+                Console.WriteLine(filename);
+                var directions = GetDirections(filename).ToList();
 
+                var navi = Navigate(directions);
                 var sum = navi.Visited.Count(x => x.Value > 0);
-                Console.WriteLine(@"{0}: {1}", filename, sum);
+                Console.WriteLine(@"Santa: {0}", sum);
+
+                var lists = directions
+                    .Select((x, i) => new {Index = i, Value = x})
+                    .GroupBy(x => x.Index%2)
+                    .Select(x => x.Select(v => v.Value).ToList()).ToList();
+
+                var santa = Navigate(lists[0]);
+                var robot = Navigate(lists[1]);
+
+                var visited = santa.Visited
+                    .Union(robot.Visited)
+                    .GroupBy(v => v.Key)
+                    .ToDictionary(x => x.Key, v => v.Sum(a => a.Value));
+
+                var sumBoth = visited.Count(x => x.Value > 0);
+                Console.WriteLine(@"Santa and Robot: {0}", sumBoth);
             }
 
             Console.ReadLine();
@@ -48,14 +64,14 @@ namespace Puzzle03
 
         private class Navi
         {
-            public Dictionary<Point, int> Visited { get; }
-            public Point Position{ get; private set; }
-
             public Navi()
             {
                 Position = new Point(0, 0);
-                Visited = new Dictionary<Point, int>() { { Position, 1} };
+                Visited = new Dictionary<Point, int> {{Position, 1}};
             }
+
+            public Dictionary<Point, int> Visited { get; }
+            public Point Position { get; private set; }
 
             public void Go(char direction)
             {
@@ -98,18 +114,18 @@ namespace Puzzle03
 
         private struct Point
         {
+            public Point(int x, int y)
+            {
+                X = x;
+                Y = y;
+            }
+
             public int X { get; }
             public int Y { get; }
 
             public override string ToString()
             {
                 return string.Format(@"({0},{1})", X, Y);
-            }
-
-            public Point(int x, int y)
-            {
-                X = x;
-                Y = y;
             }
 
             public bool Equals(Point other)
