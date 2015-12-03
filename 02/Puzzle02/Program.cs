@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Puzzle02
 {
@@ -16,9 +13,11 @@ namespace Puzzle02
             {
                 var presents = GetPresents(filename).ToList();
 
-                var sum = presents.Select(p => p.WrapArea()).Sum();
+                var paperSum = presents.Select(p => p.WrapArea()).Sum();
+                var ribbonSum = presents.Select(p => p.RibbonLength()).Sum();
       
-                Console.WriteLine("Sum: {0}", sum);
+                Console.WriteLine("Paper sum: {0}", paperSum);
+                Console.WriteLine("Ribbon sum: {0}", ribbonSum);
             }
 
             Console.ReadLine();
@@ -56,6 +55,21 @@ namespace Puzzle02
             {
                 var sides = new List<int>() {Length*Width, Width*Height, Height*Length};
                 return sides.Sum()*2 + sides.Min();
+            }
+
+            public int RibbonLength()
+            {
+                var sides = new List<int>() {Length, Width, Height};
+                sides.Sort();
+                var a = sides[0];
+                var b = sides[1];
+
+                return (a + b)*2 + Volume();
+            }
+
+            public int Volume()
+            {
+                return Length*Width*Height;
             }
         }
     }
