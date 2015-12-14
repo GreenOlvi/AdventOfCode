@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Puzzle13
 {
@@ -15,9 +13,12 @@ namespace Puzzle13
             foreach (var filename in args)
             {
                 var table = new TablePlanner(filename);
-
                 var best = table.FindMostHappiness();
                 Console.WriteLine("Best: {0}", best);
+
+                var tableWithMe = new TablePlanner(filename, true);
+                var bestWithMe = tableWithMe.FindMostHappiness();
+                Console.WriteLine("Best (with me): {0}", bestWithMe);
             }
 
             Console.ReadLine();
@@ -27,16 +28,17 @@ namespace Puzzle13
             public string[] People { get; private set; }
             public int[,] Happiness;
             public int Count => People.Length;
+            private const string ME = @"me";
 
-            public TablePlanner(string filename)
+            public TablePlanner(string filename, bool includeMe = false)
             {
-                FromFile(filename);
+                FromFile(filename, includeMe);
             }
 
             private static readonly Regex LineRegex =
                 new Regex(@"^(?<person1>\w+) would (?<sign>gain|lose) (?<value>\d+) happiness units by sitting next to (?<person2>\w+).$");
 
-            private void FromFile(string filename)
+            private void FromFile(string filename, bool includeMe = false)
             {
                 var people = new HashSet<string>();
                 var happiness = new List<Tuple<string, string, int>>();
@@ -57,6 +59,16 @@ namespace Puzzle13
                     people.Add(b);
 
                     happiness.Add(new Tuple<string, string, int>(a, b, value));
+                }
+
+                if (includeMe)
+                {
+                    people.Add(ME);
+                    foreach (var p in people)
+                    {
+                        happiness.Add(new Tuple<string, string, int>(ME, p, 0));
+                        happiness.Add(new Tuple<string, string, int>(p, ME, 0));
+                    }
                 }
 
                 People = people.OrderBy(x => x).ToArray();
