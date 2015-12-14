@@ -14,9 +14,19 @@ namespace Puzzle14
         {
             foreach (var filename in args)
             {
-                var reindeers = GetInput(filename).Select(x => new Reindeer(x));
+                var reindeers = GetInput(filename).Select(x => new Reindeer(x)).ToList();
 
-                var best = reindeers.Select(r => r.GetDistance(Time)).Max();
+                var fastest = reindeers.Select(r => r.GetDistance(Time)).Max();
+                Console.WriteLine("Fastest reindeer: {0}", fastest);
+
+                for (int i = 1; i <= Time; i++)
+                {
+                    var dist = reindeers.Select(x => new Tuple<int, Reindeer>(x.GetDistance(i), x)).ToList();
+                    var max = dist.Max(x => x.Item1);
+                    dist.Where(x => x.Item1 == max).ToList().ForEach(x => x.Item2.GiveStar());
+                }
+
+                var best = reindeers.Max(x => x.Stars);
                 Console.WriteLine("Best reindeer: {0}", best);
             }
 
@@ -40,6 +50,7 @@ namespace Puzzle14
             public int Velocity { get; private set; }
             public int RunTime { get; private set; }
             public int WaitTime { get; private set; }
+            public int Stars { get; private set; } = 0;
 
             private static readonly Regex LineRegex =
                 new Regex(@"^(?<name>\w+) can fly (?<velocity>\d+) km/s for (?<run_time>\d+) seconds, but then must rest for (?<wait_time>\d+) seconds.$");
@@ -63,6 +74,16 @@ namespace Puzzle14
                 var r = Math.Min(time%(RunTime + WaitTime), RunTime);
 
                 return cycles * RunTime * Velocity + r * Velocity;
+            }
+
+            public void GiveStar()
+            {
+                Stars++;
+            }
+
+            public override string ToString()
+            {
+                return Name;
             }
         }
     }
