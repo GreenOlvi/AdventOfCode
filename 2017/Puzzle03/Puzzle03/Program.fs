@@ -1,46 +1,82 @@
 ﻿open System
-
-let test f data =
-    let testResults =
-        data
-        |> List.map (fun (input, expected) -> 
-            let result = input |> f
-            printfn "input: %A, result: %A, should be: %A" input result expected
-            result = expected
-        )
-    let successful = (testResults |> List.filter (fun i -> i) |> List.length)
-    printfn "Success %A/%A\n" successful data.Length
+open Utils.Common
+open System.Collections.Generic
 
 let toCartesian (id:int):(int*int) =
     match id with
         | 0 -> invalidArg "id" "Should be greater than 1"
         | 1 -> (0, 0)
         | _ ->
-            let layer = int(Math.Floor(Math.Sqrt(double (id - 1)) - 1.0) / 2.0) + 1
-            let n = 8 * layer
-            let side = 2 * layer
-            let start = 4 * layer * layer - 4 * layer + 1
-            let dist = (double ((id - 1) - start) / (double n)) * 4.0
-            let quarter = int(Math.Floor(dist))
-            let offset = int(Math.Ceiling((dist - double(quarter)) * double(side) - double(side / 2 - 1)))
-            match quarter with
-                | 0 -> (layer, offset)
-                | 1 -> (-offset, layer)
-                | 2 -> (-layer, -offset)
-                | 3 -> (offset, -layer)
+            let layer = Math.Floor((Math.Sqrt(float(id) - 1.0) - 1.0) / 2.0) + 1.0
+            let n = 8.0 * layer
+            let side = 2.0 * layer
+            let start = 4.0 * layer * layer - 4.0 * layer + 2.0
+            let d = float(id) - start
+            let q = Math.Floor((d / n) * 4.0)
+            let o = d - q * float(side) - layer + 1.0
+            let (l', o') = int layer, int o
+            match int(q) with
+                | 0 -> (l', o')
+                | 1 -> (-o', l')
+                | 2 -> (-l', -o')
+                | 3 -> (o', -l')
                 | _ -> invalidArg "quarter" "Expected value in 0..3"
+
+let posCache = Dictionary<int * int, int>()
+posCache.Add((0, 0), 1)
+
+let fillCache (x, y) =
+    let layer = max (abs x ) (abs y )
+    let layerStart = 4 * layer * layer - 4 * layer + 2
+    let layerEnd = layerStart + 8 * layer - 1
+    [layerStart .. layerEnd]
+        |> List.iter (fun id ->
+            let c = toCartesian(id)
+            if not(posCache.ContainsKey(c)) then posCache.Add(c, id))
+
+let toSpiral coords =
+    match posCache.ContainsKey(coords) with
+    | true ->
+        posCache.Item(coords)
+    | false ->
+        fillCache coords
+        posCache.Item(coords)
+
+let neighbours = [(0, 1); (1, 1); (1, 0); (1, -1); (0, -1); (-1, -1); (-1, 0); (-1, 1)]
+
+let sumCache = Dictionary<int, int>(dict [(1, 1)])
+let rec countSum id =
+    match sumCache.ContainsKey(id) with
+    | true -> sumCache.[id]
+    | false -> 
+        let (x, y) = toCartesian id
+        let s =
+            neighbours
+            |> List.map (fun (nx, ny) -> toSpiral (x + nx, y + ny))
+            |> List.filter (fun i -> i < id)
+            |> List.map (fun i -> countSum(i))
+            |> List.sum
+        sumCache.Add(id, s)
+        s
 
 let solve1 (input:int) =
     let (x, y) = toCartesian input
     abs(x) + abs(y)
 
-let solve2 input = 0
+let solve2 input =
+    let rec loop id =
+        let sum = countSum id
+        match sum with
+        | s when s > input -> s
+        | _ -> loop (id + 1)
+    loop 1
 
 [<EntryPoint>]
-let main argv = 
+let main _ = 
     let input = 325489
 
     printfn "--- Tests ---"
+    test toCartesian [(34, (0, 3)); (5, (-1, 1))]
     test toCartesian [(1, (0, 0)); (2, (1, 0)); (3, (1, 1)); (5, (-1, 1)); (10, (2, -1)); (23, (0, -2))]
     test solve1 [(1, 0); (12, 3); (23, 2); (1024, 31)]
 
@@ -48,7 +84,17 @@ let main argv =
     printfn "Result 1: %A\n" result1
 
     printfn "--- Tests ---"
-    test solve2 []
+    test toSpiral ([1..81] |> List.map (fun id -> (toCartesian id, id)))
+    test countSum [
+        (1, 1);
+        (2, 1);
+        (3, 2);
+        (5, 5);
+        (7, 11);
+        (9, 25);
+        (11, 54);
+        (17, 147)
+    ]
 
     let result2 = solve2 input
     printfn "Result 2: %A\n" result2
