@@ -11,6 +11,7 @@ let map f p = p >> Option.map (fun (x, rest) -> (f x), rest)
 
 let cons a b = a::b
 
+// Group parser
 let rec parseGroup:Group Parser =
     let rec parseInner =
         function
@@ -21,7 +22,6 @@ let rec parseGroup:Group Parser =
             | Some (Choice1Of2 group, rst) -> map (cons group) parseInner rst
             | Some (Choice2Of2 _, rst) -> parseInner rst
             | None -> None
-
     function
     | '{'::inner -> map Group parseInner inner
     | _ -> None
@@ -32,7 +32,6 @@ and parseGarbage:Garbage Parser =
        | '!'::_::rest -> parseInner rest
        | '>'::rest -> Some((), rest)
        | _::rest -> parseInner rest
-
    function
    | '<'::inner -> parseInner inner
    | _ -> None
@@ -48,23 +47,62 @@ let score g:int =
         n + Seq.sumBy (innerScore (n+1)) groups
     innerScore 1 g
 
+// Garbager parser
+type Garbager = char list
+
+let rec parseGarbagerFromGroup: Garbager Parser =
+    let rec parseInner =
+        function
+            | '}'::rest -> Some ([], rest)
+            | ','::text
+            | text ->
+                match parseGroupOrGarbager text with
+                | Some (garbage, rest) -> map (List.append garbage) parseInner rest
+                | None -> None
+    function
+        | '{'::inner -> parseInner inner
+        | _ -> None
+
+and parseGarbager: Garbager Parser =
+    let rec parseInner =
+        function
+            | '!'::_::rest -> parseInner rest
+            | '>'::rest -> Some ([], rest)
+            | c::rest -> map (cons c) parseInner rest
+    function
+        | '<'::inner -> parseInner inner
+        | _ -> None
+
+and parseGroupOrGarbager: Garbager Parser =
+    function
+        | '{'::inner -> parseGarbagerFromGroup ('{'::inner)
+        | '<'::inner -> parseGarbager ('<'::inner)
+        | _ -> None
+
 let readInput file = File.ReadAllText(file).Trim() |> List.ofSeq
 
 let solve1 input =
-    let g = input |> parseGroup
+    let g = input |> List.ofSeq |> parseGroup
     match g with
     | Some (group, _) -> score group
+    | None -> 0
+
+let solve2 input =
+    let g = input |> List.ofSeq |> parseGroupOrGarbager
+    match g with
+    | Some (garbage, _) -> garbage.Length
     | None -> 0
 
 [<EntryPoint>]
 let main _ = 
     let input = readInput "input.txt"
 
+    printfn "--- Tests ---\n"
     test parseGroupOrGarbage [
-        ("{}" |> List.ofSeq), Some (Choice1Of2 (Group []), []);
-        ("{{}}" |> List.ofSeq), Some (Choice1Of2 (Group [Group []]), []);
-        ("{{},{}}" |> List.ofSeq), Some (Choice1Of2 (Group [Group []; Group []]), []);
-        ("{{{}},{}}" |> List.ofSeq), Some (Choice1Of2 (Group [Group [Group []]; Group []]), []);
+        ("{}" |> List.ofSeq, Some (Choice1Of2 (Group []), []));
+        ("{{}}" |> List.ofSeq, Some (Choice1Of2 (Group [Group []]), []));
+        ("{{},{}}" |> List.ofSeq, Some (Choice1Of2 (Group [Group []; Group []]), []));
+        ("{{{}},{}}" |> List.ofSeq, Some (Choice1Of2 (Group [Group [Group []]; Group []]), []));
     ]
 
     test score [
@@ -76,6 +114,18 @@ let main _ =
 
     let result1 = timeIt (fun () -> solve1 input)
     printfn "Result 1: %A" result1
+
+    printfn "--- Tests ---\n"
+    test solve2 [
+        ("{}", 0);
+        ("<>", 0);
+        ("{<random characters>}", 17);
+        ("<<<<>", 3);
+        ("<!!>", 0);
+    ]
+
+    let result2 = timeIt (fun () -> solve2 input)
+    printfn "Result 2: %A" result2
 
     Console.ReadLine() |> ignore
     0 // return an integer exit code
