@@ -33,23 +33,51 @@ let step (s:State) l :State =
         list = newList;
     }
 
-let solve size input =
-    let lastState = input |> List.fold step { position = 0; skipSize = 0; list = List.ofSeq {0..size}}
-    List.item 0 lastState.list * List.item 1 lastState.list
+let round initialState input = input |> List.fold step initialState
 
-let solve1 = (solve 255)
+let rounds count initialState input =
+    let rec r state i =
+        match i with
+        | 0 -> state
+        | _ ->
+            let s = round state input
+            r s (i - 1)
+    r initialState count
 
 let parseInput =
     splitString [| '\n'; '\r'; ' '; '\t'; ',' |]
     >> Array.map Int32.Parse
     >> List.ofArray
 
-let readInput file =
-    File.ReadAllText file |> parseInput
+let toAscii (string:String) =
+    System.Text.ASCIIEncoding.ASCII.GetBytes(string)
+    |> List.ofArray
+    |> List.map Convert.ToInt32
+
+let xor values = List.fold (^^^) 0 values
+
+let bytesToHex (bytes:int list) =
+    bytes
+    |> List.map (fun (b:int) -> System.String.Format("{0:x2}", b))
+    |> String.concat String.Empty
+
+let readInput file = File.ReadAllText(file).Trim()
+
+let initialState = { position = 0; skipSize = 0; list = List.ofSeq {0..255}}
+
+let solve1 input =
+    let parsed = input |> parseInput
+    let state = round initialState parsed
+    List.item 0 state.list * List.item 1 state.list
+
+let solve2 input =
+    let newInput = List.concat [input |> toAscii; [17; 31; 73; 47; 23]]
+    let state = rounds 64 initialState newInput
+    let chunks = state.list |> List.chunkBySize 16
+    chunks |> List.map xor |> bytesToHex
 
 [<EntryPoint>]
 let main _ =
-
     printfn "--- Tests ---\n"
     test parseInput [
         ("0,1,2,3,4", [0; 1; 2; 3; 4])
@@ -64,14 +92,34 @@ let main _ =
         ((3, 4, [0; 1; 2; 3; 4]), [4; 3; 2; 1; 0]);
     ]
 
-    test (solve 4) [
-        ([3; 4; 1; 5], 12);
+    test (round {position = 0; skipSize = 0; list = List.ofSeq {0..4}}) [
+        ([3; 4; 1; 5], {position = 4; skipSize = 4; list = [3; 4; 2; 1; 0]});
+    ]
+
+    test toAscii [
+        ("0", [48]);
+        ("1,2,3", [49; 44; 50; 44; 51])
+    ]
+
+    test xor [
+        ([65; 27; 9; 1; 4; 3; 40; 50; 91; 7; 6; 0; 2; 5; 68; 22], 64);
+    ]
+
+    test solve2 [
+        ("", "a2582a3a0e66e6e86e3812dcb672a272");
+        ("AoC 2017", "33efeb34ea91902bb2f59c9920caa6cd");
+        ("1,2,3", "3efbe78a8d82f29979031a4aa0b16a9d");
+        ("1,2,4", "63960835bcdc130f0b66d7ff4f6a5a8e");
     ]
 
     let input = readInput "input.txt"
 
-    let result = solve1 input
-    printfn "%A" result
+    let result1 = solve1 input
+    printfn "Result 1: %A" result1
+
+    let result2 = solve2 input
+    printfn "Result 2: %s" result2
+
 
     Console.ReadLine() |> ignore
     0 // return an integer exit code
