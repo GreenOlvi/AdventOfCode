@@ -34,3 +34,7 @@ module Common =
 
     let test f data = testN (fun a -> f a) data
 
+    let splitString (chars:char seq) (input:string) =
+        input.Split(chars |> Array.ofSeq, StringSplitOptions.RemoveEmptyEntries)
+
+    let cartesian xs ys = xs |> Seq.collect (fun x -> ys |> Seq.map (fun y -> (x, y)))
