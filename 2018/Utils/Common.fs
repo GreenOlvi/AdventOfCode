@@ -2,6 +2,7 @@ namespace Utils
 
 module Common =
     open System
+    open System.Text.RegularExpressions
 
     let timeIt action =
         let stopwatch = System.Diagnostics.Stopwatch.StartNew()
@@ -37,4 +38,21 @@ module Common =
     let splitString (chars:char seq) (input:string) =
         input.Split(chars |> Array.ofSeq, StringSplitOptions.RemoveEmptyEntries)
 
-    let cartesian xs ys = xs |> Seq.collect (fun x -> ys |> Seq.map (fun y -> (x, y)))
+    let cartesian xs ys = ys |> Seq.collect (fun y -> xs |> Seq.map (fun x -> (x, y)))
+
+    let (|FirstRegexGroup|_|) pattern input =
+        let m = Regex.Match(input,pattern) 
+        match (m.Success) with
+        | true -> Some m.Groups.[1].Value
+        | false -> None  
+
+    let (|RegexMatch|_|) pattern input =
+        let m = Regex.Match(input,pattern) 
+        match (m.Success) with
+        | true -> Some ()
+        | false -> None  
+
+    let (|StartsWith|_|) (pattern:string) (input:string)  =
+        match input.StartsWith(pattern) with
+        | true -> Some ()
+        | false -> None
