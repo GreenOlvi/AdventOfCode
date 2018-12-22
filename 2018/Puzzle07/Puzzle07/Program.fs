@@ -13,6 +13,11 @@ let parseLine line =
 let readInput file =
     File.ReadAllLines file |> Seq.map parseLine |> List.ofSeq
 
+let availableTasks edges =
+    let left = edges |> Seq.map fst |> set
+    let right = edges |> Seq.map snd |> set
+    Set.difference left right |> Seq.sort
+
 let solve1 input =
     let rec loop (result:string) (edges:(string * string) list) : string =
         let left = edges |> Seq.map fst |> set
@@ -24,6 +29,45 @@ let solve1 input =
         | _ -> loop (result + node) newEdges
 
     loop String.Empty input
+
+type BusyWorker = {
+    id : int;
+    currentTask : string option;
+    busyFor : int;
+}
+
+type Worker =
+    | Idle of int
+    | Busy of BusyWorker
+
+let initWorkers count = seq {1..count} |> Seq.map (fun i -> Idle i) |> List.ofSeq
+
+let decreaseTime busy =
+    let ws =
+        busy
+        |> Seq.map (fun w ->
+        let newTime = w.busyFor - 1
+        match newTime with
+        | 0 -> Idle w.id
+        | _ -> Busy { w with busyFor = newTime })
+        |> List.ofSeq
+    (ws |> List.choose (fun w -> match w with Busy _ -> Some w | _ -> None),
+        ws |> List.choose (fun w -> match w with Idle _ -> Some w | _ -> None))
+
+
+let time name = (name |> Seq.item 0 |> int) - 0x40
+let time60 name = time name + 60
+
+let solve2 timeFunction workerCount input =
+    let rec loop t edges busy idle =
+        printfn "Free workers: %A" idle
+
+        let freeTasks = availableTasks input
+        printfn "Free tasks: %A" freeTasks
+
+        0
+
+    loop 0 input [] (initWorkers workerCount)
 
 [<EntryPoint>]
 let main _ =
@@ -41,10 +85,10 @@ let main _ =
         ]
         |> List.map parseLine
     
-    Common.test solve1 [(testInput, "CABDFE")]
+    //Common.test solve1 [(testInput, "CABDFE")]
+    Common.test (fun i -> solve2 time 2 i) [(testInput, 15)]
 
-    let result1 = Common.timeIt (fun () -> solve1 input)
-    printfn "Result 1: %A" result1
+    let result1 = Common.timeResult 1 { return solve1 input }
 
     Console.ReadLine() |> ignore
     0 // return an integer exit code
