@@ -4,12 +4,22 @@ module Common =
     open System
     open System.Text.RegularExpressions
 
-    let timeIt action =
+    type timedBuilder(id) =
         let stopwatch = System.Diagnostics.Stopwatch.StartNew()
-        let result = action()
-        stopwatch.Stop()
-        printfn "%f seconds\n" stopwatch.Elapsed.TotalSeconds
-        result
+        let logTime = printfn "Took %f seconds" stopwatch.Elapsed.TotalSeconds
+        member this.Bind(x, f) =
+            let r = f x
+            logTime
+            r
+        member this.Return(x) =
+            match id with
+            | Some i -> printfn "Result %d: %A\n" i x
+            | None -> printfn ""
+            logTime
+            x
+
+    let timeResult id = new timedBuilder(Some id)
+    let timeIt = new timedBuilder(None)
 
     let wrapColor color printAction =
         let old = System.Console.ForegroundColor
@@ -39,6 +49,7 @@ module Common =
         input.Split(chars |> Array.ofSeq, StringSplitOptions.RemoveEmptyEntries)
 
     let cartesian xs ys = ys |> Seq.collect (fun y -> xs |> Seq.map (fun x -> (x, y)))
+    let buildGrid width height = seq {0..height-1} |> cartesian (seq {0..width-1})
 
     let (|FirstRegexGroup|_|) pattern input =
         let m = Regex.Match(input,pattern) 
