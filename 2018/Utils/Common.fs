@@ -21,6 +21,13 @@ module Common =
     let timeResult id = new timedBuilder(Some id)
     let timeIt = new timedBuilder(None)
 
+    let timeAction action =
+        let stopwatch = System.Diagnostics.Stopwatch.StartNew()
+        let result = action()
+        stopwatch.Stop()
+        printfn "\nTook %f seconds" stopwatch.Elapsed.TotalSeconds
+        result
+
     let wrapColor color printAction =
         let old = System.Console.ForegroundColor
         System.Console.ForegroundColor <- color
