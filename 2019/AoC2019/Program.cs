@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace AoC2019
 {
@@ -15,16 +17,42 @@ namespace AoC2019
         {
             Console.WriteLine("Advent of Code 2019");
 
-            var file = "input/01.txt";
-            var p01 = new Puzzle01.Solution(ReadLines(file));
-
-            var result1 = p01.Solve1Async().Result;
-            Console.WriteLine($"Result 1 = {result1}");
-
-            var result2 = p01.Solve2Async().Result;
-            Console.WriteLine($"Result 2 = {result2}");
+            RunPuzzle(1).Wait();
 
             Console.ReadLine();
+        }
+
+        private static async Task RunPuzzle(int id)
+        {
+            Console.WriteLine($"Running solution for Puzzle {id:d2}");
+
+            var file = GetInput(id);
+            Console.WriteLine($"Reading from {file}");
+
+            var puzzle = Puzzles[id](file);
+
+            var stopwatch = new Stopwatch();
+
+            Console.WriteLine();
+            Console.WriteLine("Calculating 1...");
+            stopwatch.Start();
+            var result1 = await puzzle.Solve1Async();
+            stopwatch.Stop();
+            Console.WriteLine($"Result 1 = {result1}");
+            Console.WriteLine($"Took {stopwatch.Elapsed}");
+
+            Console.WriteLine();
+            Console.WriteLine("Calculating 2...");
+            stopwatch.Restart();
+            var result2 = await puzzle.Solve2Async();
+            stopwatch.Stop();
+            Console.WriteLine($"Result 2 = {result2}");
+            Console.WriteLine($"Took {stopwatch.Elapsed}");
+        }
+
+        private static string GetInput(int id)
+        {
+            return $"input/{id:d2}.txt";
         }
 
         private static IEnumerable<string> ReadLines(string fileName)
