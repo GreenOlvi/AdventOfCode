@@ -11,13 +11,14 @@ namespace AoC2019
         private static readonly IDictionary<int, Func<string, IPuzzle>> Puzzles = new Dictionary<int, Func<string, IPuzzle>>()
         {
             { 1, f => new Puzzle01.Solution(ReadLines(f)) },
+            { 2, f => new Puzzle02.Solution(File.ReadAllText(f)) }
         };
 
         internal static void Main(string[] args)
         {
             Console.WriteLine("Advent of Code 2019");
 
-            RunPuzzle(1).Wait();
+            RunPuzzle(2).Wait();
 
             Console.ReadLine();
         }
@@ -41,13 +42,20 @@ namespace AoC2019
             Console.WriteLine($"Result 1 = {result1}");
             Console.WriteLine($"Took {stopwatch.Elapsed}");
 
-            Console.WriteLine();
-            Console.WriteLine("Calculating 2...");
-            stopwatch.Restart();
-            var result2 = await puzzle.Solve2Async();
-            stopwatch.Stop();
-            Console.WriteLine($"Result 2 = {result2}");
-            Console.WriteLine($"Took {stopwatch.Elapsed}");
+            try
+            {
+                Console.WriteLine();
+                Console.WriteLine("Calculating 2...");
+                stopwatch.Restart();
+                var result2 = await puzzle.Solve2Async();
+                stopwatch.Stop();
+                Console.WriteLine($"Result 2 = {result2}");
+                Console.WriteLine($"Took {stopwatch.Elapsed}");
+            }
+            catch (AggregateException e)
+            {
+                Console.WriteLine(e.Flatten().ToString());
+            }
         }
 
         private static string GetInput(int id)
