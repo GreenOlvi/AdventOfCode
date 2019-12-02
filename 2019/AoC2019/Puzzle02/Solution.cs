@@ -64,15 +64,16 @@ namespace AoC2019.Puzzle02
             return mem[0];
         }
 
-        public static long Solve1(IEnumerable<long> input)
+        public static long Solve1(IEnumerable<long> input, long noun, long verb)
         {
-            return Run(input.ToArray(), 12, 02);
+            return Run(input.ToArray(), noun, verb);
         }
 
         public static long Solve2(IEnumerable<long> input, long searched)
         {
             var mem = input as long[] ?? input.ToArray();
 
+            var tries = 0;
             foreach (var noun in Enumerable.Range(0, 99))
             {
                 foreach (var verb in Enumerable.Range(0, 99))
@@ -82,6 +83,7 @@ namespace AoC2019.Puzzle02
                         var result = Run(mem, noun, verb);
                         if (result == searched)
                         {
+                            Console.WriteLine($"{tries} tries.");
                             return 100 * noun + verb;
                         }
                     }
@@ -89,6 +91,7 @@ namespace AoC2019.Puzzle02
                     {
                         Console.WriteLine($"[{noun}, {verb}] Out of range: {e.Message}");
                     }
+                    tries++;
                 }
             }
 
@@ -96,7 +99,7 @@ namespace AoC2019.Puzzle02
         }
 
         public async Task<string> Solve1Async() =>
-            await Task.Run(() => Solve1(_input).ToString());
+            await Task.Run(() => Solve1(_input, 12, 2).ToString());
 
         public async Task<string> Solve2Async() =>
             await Task.Run(() => Solve2(_input, 19690720).ToString());

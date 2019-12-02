@@ -15,7 +15,7 @@ namespace AoCTests
         [TestCase(new long[] { 1, 9, 10, 3, 2, 3, 11, 0, 99, 30, 40, 50 }, 3500)]
         public void Solve1Test(long[] input, int result)
         {
-            Solution.Solve1(input).Should().Be(result);
+            Solution.Solve1(input, input[1], input[2]).Should().Be(result);
         }
 
         [Test]

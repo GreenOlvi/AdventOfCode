@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 namespace AoCTests
 {
-    public class Tests
+    public class Puzzle01Tests
     {
         [Test]
         [TestCase(12, 2)]
