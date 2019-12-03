@@ -11,14 +11,15 @@ namespace AoC2019
         private static readonly IDictionary<int, Func<string, IPuzzle>> Puzzles = new Dictionary<int, Func<string, IPuzzle>>()
         {
             { 1, f => new Puzzle01.Solution(ReadLines(f)) },
-            { 2, f => new Puzzle02.Solution(File.ReadAllText(f)) }
+            { 2, f => new Puzzle02.Solution(File.ReadAllText(f)) },
+            { 3, f => new Puzzle03.Solution(ReadLines(f)) },
         };
 
         internal static void Main(string[] args)
         {
             Console.WriteLine("Advent of Code 2019");
 
-            RunPuzzle(2).Wait();
+            RunPuzzle(3).Wait();
 
             Console.ReadLine();
         }
