@@ -5,14 +5,26 @@ using System.Threading.Tasks;
 
 namespace AoC2019.Puzzle03
 {
-    public partial class Solution : IPuzzle
+    public class Solution : IPuzzle
     {
         public Solution(IEnumerable<string> input)
         {
-            _input = input.Select(line => ParseWire(line).ToList()).ToList();
+            var wires = input.ToArray();
+            _wire1 = ParseWire(wires[0]).ToArray();
+            _wire2 = ParseWire(wires[1]).ToArray();
         }
 
-        private readonly List<List<Wire>> _input;
+        private readonly Wire[] _wire1;
+        private readonly Wire[] _wire2;
+
+        private static readonly IDictionary<Direction, Func<int, int, (int, int)>> DirectionChange =
+            new Dictionary<Direction, Func<int, int, (int, int)>>()
+            {
+                { Direction.Up, (xo, yo) => (xo, yo - 1) },
+                { Direction.Down, (xo, yo) => (xo, yo + 1) },
+                { Direction.Left, (xo, yo) => (xo - 1, yo) },
+                { Direction.Right, (xo, yo) => (xo + 1, yo) },
+            };
 
         private static IEnumerable<(int, int)> Unwind(IEnumerable<Wire> wire)
         {
@@ -21,74 +33,55 @@ namespace AoC2019.Puzzle03
 
             foreach (var w in wire)
             {
-                switch (w.Direction)
+                if (!DirectionChange.TryGetValue(w.Direction, out var next))
                 {
-                    case Direction.Up:
-                        foreach (var i in Enumerable.Range(0, w.Distance))
-                        {
-                            y--;
-                            yield return (x, y);
-                        }
-                        break;
-                    case Direction.Down:
-                        foreach (var i in Enumerable.Range(0, w.Distance))
-                        {
-                            y++;
-                            yield return (x, y);
-                        }
-                        break;
-                    case Direction.Left:
-                        foreach (var i in Enumerable.Range(0, w.Distance))
-                        {
-                            x--;
-                            yield return (x, y);
-                        }
-                        break;
-                    case Direction.Right:
-                        foreach (var i in Enumerable.Range(0, w.Distance))
-                        {
-                            x++;
-                            yield return (x, y);
-                        }
-                        break;
+                    throw new ArgumentOutOfRangeException(nameof(w.Direction));
+                }
+
+                foreach (var _ in Enumerable.Range(0, w.Distance))
+                {
+                    (x, y) = next(x, y);
+                    yield return (x, y);
                 }
             }
         }
 
-        public static int ManhattanDistance((int, int) x, (int, int) y) =>
+        private static int ManhattanDistance((int, int) x, (int, int) y) =>
             Math.Abs(x.Item1 - y.Item1) + Math.Abs(x.Item2 - y.Item2);
 
-        public static int Solve1(IEnumerable<IEnumerable<Wire>> wires)
+        public static int Solve1(IEnumerable<Wire> w1, IEnumerable<Wire> w2)
         {
-            var positions = wires.Select(Unwind).ToArray();
-            var intersections = positions[0].Intersect(positions[1]);
+            var p1 = Unwind(w1).ToList();
+            var p2 = Unwind(w2).ToList();
+            var intersections = p1.Intersect(p2);
 
             return intersections.Min(i => ManhattanDistance((0, 0), i));
         }
 
-        public static int Solve2(IEnumerable<IEnumerable<Wire>> wires)
+        public static int Solve2(IEnumerable<Wire> w1, IEnumerable<Wire> w2)
         {
-            var positions = wires.Select(w => Unwind(w).ToList()).ToArray();
-            var intersections = positions[0].Intersect(positions[1]);
+            var p1 = Unwind(w1).ToList();
+            var p2 = Unwind(w2).ToList();
+            var intersections = p1.Intersect(p2);
 
-            return intersections.Select(i =>
+            return intersections.Min(i =>
             {
-                var w1 = positions[0].FindIndex(p => i == p) + 1;
-                var w2 = positions[1].FindIndex(p => i == p) + 1;
-                return w1 + w2;
-            }).Min();
+                var d1 = p1.FindIndex(p => i == p) + 1;
+                var d2 = p2.FindIndex(p => i == p) + 1;
+                return d1 + d2;
+            });
         }
 
         public async Task<string> Solve1Async() =>
-            await Task.Run(() => Solve1(_input).ToString());
+            await Task.Run(() => Solve1(_wire1, _wire2).ToString());
 
         public async Task<string> Solve2Async() =>
-            await Task.Run(() => Solve2(_input).ToString());
+            await Task.Run(() => Solve2(_wire1, _wire2).ToString());
 
         public static IEnumerable<Wire> ParseWire(string input)
         {
             return input.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                .Select(Wire.Parse);
+                .Select(w => Wire.TryParse(w, out var wire) ? wire : throw new ArgumentException($"Not a proper Wire definition '{w}'"));
         }
     }
 }
