@@ -44,20 +44,13 @@ namespace AoC2019
             Console.WriteLine($"Result 1 = {result1}");
             Console.WriteLine($"Took {stopwatch.Elapsed}");
 
-            try
-            {
-                Console.WriteLine();
-                Console.WriteLine("Calculating 2...");
-                stopwatch.Restart();
-                var result2 = await puzzle.Solve2Async();
-                stopwatch.Stop();
-                Console.WriteLine($"Result 2 = {result2}");
-                Console.WriteLine($"Took {stopwatch.Elapsed}");
-            }
-            catch (AggregateException e)
-            {
-                Console.WriteLine(e.Flatten().ToString());
-            }
+            Console.WriteLine();
+            Console.WriteLine("Calculating 2...");
+            stopwatch.Restart();
+            var result2 = await puzzle.Solve2Async();
+            stopwatch.Stop();
+            Console.WriteLine($"Result 2 = {result2}");
+            Console.WriteLine($"Took {stopwatch.Elapsed}");
         }
 
         private static string GetInput(int id)

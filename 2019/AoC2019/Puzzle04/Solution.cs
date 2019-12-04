@@ -18,7 +18,7 @@ namespace AoC2019.Puzzle04
         private static (int, int) ParseInput(string input)
         {
             var i = input.Split('-', StringSplitOptions.RemoveEmptyEntries)
-                .Select(s => int.Parse(s))
+                .Select(int.Parse)
                 .ToArray();
             return (i[0], i[1]);
         }
@@ -28,25 +28,10 @@ namespace AoC2019.Puzzle04
 
         public static bool IsValid1(int number) => IsValid1(Split(number));
 
-        private static bool IsValid1(int[] n)
-        {
-            if (n.Length != 6)
-            {
-                return false;
-            }
-
-            if (!Enumerable.Range(0, 5).Any(i => n[i] == n[i + 1]))
-            {
-                return false;
-            }
-
-            if (!Enumerable.Range(0, 5).All(i => n[i] <= n[i + 1]))
-            {
-                return false;
-            }
-
-            return true;
-        }
+        private static bool IsValid1(int[] n) =>
+            n.Length == 6 &&
+            Enumerable.Range(0, 5).Any(i => n[i] == n[i + 1]) &&
+            Enumerable.Range(0, 5).All(i => n[i] <= n[i + 1]);
 
         public static IEnumerable<int> Range(int from, int to) =>
             Enumerable.Range(from, to - from + 1);
@@ -74,24 +59,19 @@ namespace AoC2019.Puzzle04
         public static bool IsValid2(int number)
         {
             var n = Split(number);
-            if (!IsValid1(n))
-            {
-                return false;
-            }
-
-            return RepeatedLengths(n).Any(l => l == 2);
+            return IsValid1(n) && RepeatedLengths(n).Any(l => l == 2);
         }
 
         public static int Solve1(int from, int to) =>
-            Range(from, to).Where(i => IsValid1(i)).Count();
+            Range(from, to).Count(IsValid1);
 
         public static int Solve2(int from, int to) =>
-            Range(from, to).Where(i => IsValid2(i)).Count();
+            Range(from, to).Count(IsValid2);
 
         public async Task<string> Solve1Async() =>
             await Task.Run(() => Solve1(_from, _to).ToString());
 
         public async Task<string> Solve2Async() =>
-           await Task.Run(() => Solve2(_from, _to).ToString());
+            await Task.Run(() => Solve2(_from, _to).ToString());
     }
 }
