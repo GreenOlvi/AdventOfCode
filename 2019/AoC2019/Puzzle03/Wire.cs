@@ -39,7 +39,7 @@ namespace AoC2019.Puzzle03
             return Direction == other.Direction && Distance == other.Distance;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is Wire other && Equals(other);
         }

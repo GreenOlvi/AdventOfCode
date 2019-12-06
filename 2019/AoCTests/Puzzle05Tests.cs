@@ -33,21 +33,5 @@ namespace AoCTests
             run.Should().Be(expRun);
             output.Should().BeEquivalentTo(expOut);
         }
-
-        [Test]
-        [TestCase()]
-        [TestCase()]
-        public void Solve1Test()
-        {
-            //Solution.Solve1().Should().Be(result);
-        }
-
-        [Test]
-        [TestCase()]
-        [TestCase()]
-        public void Solve2Test()
-        {
-            //Solution.Solve2().Should().Be(result);
-        }
     }
 }

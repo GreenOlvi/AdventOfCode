@@ -10,17 +10,19 @@ namespace AoC2019
     {
         private static readonly IDictionary<int, Func<string, IPuzzle>> Puzzles = new Dictionary<int, Func<string, IPuzzle>>()
         {
-            { 1, f => new Puzzle01.Solution(ReadLines(f)) },
+            { 1, f => new Puzzle01.Solution(File.ReadLines(f)) },
             { 2, f => new Puzzle02.Solution(File.ReadAllText(f)) },
-            { 3, f => new Puzzle03.Solution(ReadLines(f)) },
+            { 3, f => new Puzzle03.Solution(File.ReadLines(f)) },
             { 4, f => new Puzzle04.Solution(File.ReadAllText(f)) },
+            { 5, f => new Puzzle05.Solution(File.ReadAllText(f)) },
+            { 6, f => new Puzzle06.Solution(File.ReadLines(f)) },
         };
 
         internal static void Main(string[] args)
         {
             Console.WriteLine("Advent of Code 2019");
 
-            RunPuzzle(4).Wait();
+            RunPuzzle(6).Wait();
 
             Console.ReadLine();
         }
@@ -33,42 +35,26 @@ namespace AoC2019
             Console.WriteLine($"Reading from {file}");
 
             var puzzle = Puzzles[id](file);
+            await Run(1, () => puzzle.Solve1Async());
+            await Run(2, () => puzzle.Solve2Async());
+        }
 
-            var stopwatch = new Stopwatch();
-
+        private static async Task Run(int part, Func<Task<string>> solve)
+        {
             Console.WriteLine();
-            Console.WriteLine("Calculating 1...");
-            stopwatch.Start();
-            var result1 = await puzzle.Solve1Async();
-            stopwatch.Stop();
-            Console.WriteLine($"Result 1 = {result1}");
-            Console.WriteLine($"Took {stopwatch.Elapsed}");
+            Console.WriteLine($"Calculating {part}...");
 
-            Console.WriteLine();
-            Console.WriteLine("Calculating 2...");
-            stopwatch.Restart();
-            var result2 = await puzzle.Solve2Async();
+            var stopwatch = Stopwatch.StartNew();
+            var result = await solve();
             stopwatch.Stop();
-            Console.WriteLine($"Result 2 = {result2}");
+
+            Console.WriteLine($"Result {part} = {result}");
             Console.WriteLine($"Took {stopwatch.Elapsed}");
         }
 
         private static string GetInput(int id)
         {
             return $"input/{id:d2}.txt";
-        }
-
-        private static IEnumerable<string> ReadLines(string fileName)
-        {
-            using var reader = new StreamReader(fileName);
-            while (!reader.EndOfStream)
-            {
-                var line = reader.ReadLine();
-                if (line != null)
-                {
-                    yield return line;
-                }
-            }
         }
     }
 }
