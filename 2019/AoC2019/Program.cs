@@ -20,13 +20,21 @@ namespace AoC2019
             { 8, f => new Puzzle08.Solution(File.ReadAllText(f)) },
             { 9, f => new Puzzle09.Solution(File.ReadAllText(f)) },
             { 12, f => new Puzzle12.Solution(File.ReadAllText(f)) },
+            { 13, f => new Puzzle13.Solution(File.ReadAllText(f)) },
         };
 
         internal static void Main(string[] args)
         {
             Console.WriteLine("Advent of Code 2019");
 
-            RunPuzzle(12).Wait();
+            try
+            {
+                RunPuzzle(13).Wait();
+            }
+            catch (AggregateException e)
+            {
+                Console.WriteLine(e.Flatten());
+            }
 
             Console.ReadLine();
         }
