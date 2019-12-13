@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using FluentAssertions;
 using AoC2019.Puzzle09;
+using AoC2019.Common;
 
 namespace AoCTests
 {
@@ -17,7 +18,7 @@ namespace AoCTests
             var mem = Solution.ParseInput(input);
             var m = new IntcodeMachine(mem);
             m.Run();
-            m.Output.Should().BeEquivalentTo(Solution.ParseInput(output));
+            m.GetAllOutput().Should().BeEquivalentTo(Solution.ParseInput(output));
         }
     }
 }

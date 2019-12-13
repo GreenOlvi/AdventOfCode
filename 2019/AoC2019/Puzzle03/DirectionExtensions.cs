@@ -1,14 +1,7 @@
-﻿namespace AoC2019.Puzzle03
-{
-    public enum Direction
-    {
-        None = 0,
-        Up,
-        Down,
-        Left,
-        Right,
-    }
+﻿using AoC2019.Common;
 
+namespace AoC2019.Puzzle03
+{
     public static class DirectionExtensions
     {
         public static bool TryParseDirection(char c, out Direction direction)

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AoC2019.Common;
+using System;
 
 namespace AoC2019.Puzzle03
 {

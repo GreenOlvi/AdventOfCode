@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
-namespace AoC2019.Puzzle09
+namespace AoC2019.Common
 {
     public class Memory : IDictionary<long, long>
     {

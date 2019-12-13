@@ -1,4 +1,4 @@
-﻿namespace AoC2019.Puzzle09
+﻿namespace AoC2019.Common
 {
     public enum ParamMode
     {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AoC2019.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -24,7 +25,7 @@ namespace AoC2019.Puzzle09
             var m = new IntcodeMachine(code);
             m.AddInput(input);
             m.Run();
-            return m.Output.Dequeue();
+            return m.GetOutput();
         }
 
         public Task<string> Solve1Async()
