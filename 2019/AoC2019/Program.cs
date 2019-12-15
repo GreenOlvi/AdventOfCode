@@ -21,6 +21,7 @@ namespace AoC2019
             { 9, f => new Puzzle09.Solution(File.ReadAllText(f)) },
             { 12, f => new Puzzle12.Solution(File.ReadAllText(f)) },
             { 13, f => new Puzzle13.Solution(File.ReadAllText(f)) },
+            { 14, f => new Puzzle14.Solution(File.ReadLines(f)) },
         };
 
         internal static void Main(string[] args)
@@ -29,7 +30,7 @@ namespace AoC2019
 
             try
             {
-                RunPuzzle(13).Wait();
+                RunPuzzle(14).Wait();
             }
             catch (AggregateException e)
             {
