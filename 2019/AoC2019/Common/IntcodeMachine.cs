@@ -38,6 +38,10 @@ namespace AoC2019.Common
             { 99, 0 },
         };
 
+        public static IEnumerable<long> ParseInput(string input) =>
+            input.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(long.Parse);
+
         public static (long, ParamMode[]) Decode(long instruction)
         {
             var opcode = instruction % 100;
@@ -209,5 +213,10 @@ namespace AoC2019.Common
             }
         }
 
+        public void AddInputAndRun(long input)
+        {
+            AddInput(input);
+            Run();
+        }
     }
 }

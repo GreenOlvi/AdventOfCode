@@ -32,5 +32,15 @@ namespace AoC2019.Common
                 Direction.Right => Direction.Up,
                 _ => throw new ArgumentException("Invalid direction", nameof(direction)),
             };
+
+        public static Direction Opposite(this Direction direction) =>
+            direction switch
+            {
+                Direction.Up => Direction.Down,
+                Direction.Down => Direction.Up,
+                Direction.Left => Direction.Right,
+                Direction.Right => Direction.Left,
+                _ => throw new ArgumentException("Invalid direction", nameof(direction)),
+            };
     }
 }
