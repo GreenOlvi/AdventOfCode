@@ -206,6 +206,11 @@ namespace AoC2019.Common
 
         public void Run()
         {
+            if (IsHalted)
+            {
+                throw new InvalidOperationException("Machine is halted");
+            }
+
             _run = true;
             while (_run)
             {

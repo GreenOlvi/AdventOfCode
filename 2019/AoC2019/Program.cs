@@ -31,7 +31,7 @@ namespace AoC2019
 
             try
             {
-                RunPuzzle(15).Wait();
+                RunPuzzle(13).Wait();
             }
             catch (AggregateException e)
             {
