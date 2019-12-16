@@ -18,8 +18,8 @@ namespace AoC2019.Common
             {
                 Direction.Up => Direction.Left,
                 Direction.Down => Direction.Right,
-                Direction.Left => Direction.Up,
-                Direction.Right => Direction.Down,
+                Direction.Left => Direction.Down,
+                Direction.Right => Direction.Up,
                 _ => throw new ArgumentException("Invalid direction", nameof(direction)),
             };
 
@@ -28,8 +28,8 @@ namespace AoC2019.Common
             {
                 Direction.Up => Direction.Right,
                 Direction.Down => Direction.Left,
-                Direction.Left => Direction.Down,
-                Direction.Right => Direction.Up,
+                Direction.Left => Direction.Up,
+                Direction.Right => Direction.Down,
                 _ => throw new ArgumentException("Invalid direction", nameof(direction)),
             };
 
