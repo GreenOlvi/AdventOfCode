@@ -82,11 +82,55 @@ namespace AoC2019.Puzzle10
             }
         }
 
+        public IEnumerable<Position> AsteroidsInShootingOrder(Position from)
+        {
+            return ShootingOrder(from, Asteroids.Where(p => p != from));
+        }
+
+        private IEnumerable<Position> ShootingOrder(Position from, IEnumerable<Position> asteroids)
+        {
+            var groups = asteroids.GroupBy(a => Angle(from, a))
+                .OrderBy(g => g.Key)
+                .Select(g => (g.Key, items: g.ToList()))
+                .ToList();
+
+            while (groups.Any())
+            {
+                foreach (var group in groups)
+                {
+                    var a = group.items.OrderBy(p => Distance(from, p)).First();
+                    group.items.Remove(a);
+                    yield return a;
+                }
+                groups = groups.Where(g => g.items.Any()).ToList();
+            }
+        }
+
+        private int Distance(Position from, Position to)
+        {
+            return Math.Abs(to.X - from.X) + Math.Abs(to.Y - from.Y);
+        }
+
+        private double Angle(Position from, Position to) =>
+            -1.0 * Math.Atan2(to.X - from.X, to.Y - from.Y);
+
+        public string DrawInShootingOrder(Position from)
+        {
+            var order = ShootingOrder(from, Asteroids.Where(p => p != from))
+                .Select((p, i) => (p, index: i + 1))
+                .ToDictionary(t => t.p, t => t.index);
+            return Draw(".   ", p => p == from ? "O   " : order[p].ToString("d4"));
+        }
+
         public string DrawVisible(Position from)
         {
             var visible = Asteroids.Where(a => IsVisible(from, a)).ToHashSet();
-            var sb = new StringBuilder();
+            return Draw(". ", p => p == from ? "X " : visible.Contains(p) ? "# " : "* ");
+        }
 
+        private string Draw(string empty, Func<Position, string> drawAsteroid)
+        {
+            var sb = new StringBuilder();
             foreach (var y in Enumerable.Range(0, _height))
             {
                 foreach (var x in Enumerable.Range(0, _width))
@@ -94,31 +138,15 @@ namespace AoC2019.Puzzle10
                     var p = new Position(x, y);
                     if (Asteroids.Contains(p))
                     {
-                        if (p == from)
-                        {
-                            sb.Append("X ");
-                        }
-                        else
-                        {
-                            if (visible.Contains(p))
-                            {
-                                sb.Append("# ");
-                            }
-                            else
-                            {
-                                sb.Append("* ");
-                            }
-                        }
+                        sb.Append(drawAsteroid(p));
                     }
                     else
                     {
-                        sb.Append(". ");
+                        sb.Append(empty);
                     }
                 }
                 sb.Append(Environment.NewLine);
             }
-
-            sb.Append(visible.Contains(from));
             return sb.ToString();
         }
     }

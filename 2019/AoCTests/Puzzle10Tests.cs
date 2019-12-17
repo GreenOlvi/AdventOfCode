@@ -141,6 +141,19 @@ namespace AoCTests
             Solution.Solve1(grid).Should().Be(expected);
         }
 
+        private static readonly IEnumerable<TestCaseData> Solve2TestCases = new[]
+        {
+            new TestCaseData(_smallGrid, 1, 302),
+            new TestCaseData(_smallGrid, 2, 400),
+            new TestCaseData(_grid5, 200, 802),
+        };
+
+        [TestCaseSource(nameof(Solve2TestCases))]
+        public void Solve2Test(Grid grid, int n, int expected)
+        {
+            Solution.Solve2(grid, n).Should().Be(expected);
+        }
+
         [Test]
         public void Solve1OnBigGrid()
         {

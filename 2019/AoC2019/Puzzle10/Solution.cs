@@ -44,6 +44,16 @@ namespace AoC2019.Puzzle10
             }
         }
 
+        private static Position BestAsteroid(Grid grid)
+        {
+            return Cartesian(grid.Asteroids, grid.Asteroids)
+                .Select(t => (t.First, t.Second, grid.IsVisible(t.First, t.Second)))
+                .GroupBy(t => t.First)
+                .Select(g => (Position: g.Key, Count: g.Where(t => t.Item3 == true).Count()))
+                .OrderByDescending(p => p.Count)
+                .First().Position;
+        }
+
         public static int Solve1(Grid grid)
         {
             return Cartesian(grid.Asteroids, grid.Asteroids)
@@ -53,12 +63,17 @@ namespace AoC2019.Puzzle10
                 .Max(i => i.Item2);
         }
 
-        public Task<string> Solve1Async()
-            => Task.Run(() => Solve1(_input).ToString());
-
-        public Task<string> Solve2Async()
+        public static int Solve2(Grid grid, int n)
         {
-            throw new NotImplementedException();
+            var p = BestAsteroid(grid);
+            var a = grid.AsteroidsInShootingOrder(p).Skip(n - 1).First();
+            return a.X * 100 + a.Y;
         }
+
+        public Task<string> Solve1Async() =>
+            Task.Run(() => Solve1(_input).ToString());
+
+        public Task<string> Solve2Async() =>
+            Task.Run(() => Solve2(_input, 200).ToString());
     }
 }
