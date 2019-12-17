@@ -27,12 +27,33 @@ namespace AoC2019.Puzzle17
         public static long Solve2(IEnumerable<long> input)
         {
             var mod = new[] { 2L }.Concat(input.Skip(1));
-            var r = new Robot(new IntcodeMachine(mod));
+            var m = new IntcodeMachine(mod);
+            var r = new Robot(m);
 
-            var path = string.Join(",", r.FindPath());
-            Console.WriteLine(path);
+            var path = r.FindPath().ToArray();
 
-            return 0;
+            var pathString = string.Join(",", path);
+            Console.WriteLine(pathString);
+
+            //var c = new Compressor();
+            //var compressed = c.Compress(path);
+
+            //Console.WriteLine(r.Draw());
+
+            m.AddInput("A,B,A,C,A,B,C,C,A,B\n");
+            m.AddInput("R,8,L,10,R,8\n");
+            m.AddInput("R,12,R,8,L,8,L,12\n");
+            m.AddInput("L,12,L,10,L,8\n");
+            m.AddInput("y\n");
+            m.Run();
+
+            var o = m.GetAllOutput().ToList();
+            var dust = o[o.Count - 1];
+            o.RemoveAt(o.Count - 1);
+
+            Console.WriteLine(o.Select(c => (char)c).ToArray());
+
+            return dust;
         }
 
         public Task<string> Solve1Async() =>
@@ -40,69 +61,5 @@ namespace AoC2019.Puzzle17
 
         public Task<string> Solve2Async() =>
             Task.Run(() => Solve2(_input).ToString());
-    }
-
-    public class Robot
-    {
-        public Robot(IntcodeMachine machine)
-        {
-            _machine = machine;
-            _machine.Run();
-
-            var o = _machine.GetAllOutput().Select(i => (char)i);
-            _grid = new Grid(o);
-
-            _position = _grid.RobotPosition;
-            _direction = _grid.RobotDirection;
-        }
-
-        private readonly IntcodeMachine _machine;
-        private Grid _grid;
-
-        private Position _position;
-        private Direction _direction;
-
-        public IEnumerable<string> FindPath()
-        {
-            var i = 0;
-            var finished = false;
-            while (!finished)
-            {
-                var front = _position.Move(_direction);
-                if (_grid.IsScaffold(front))
-                {
-                    i++;
-                    _position = front;
-                }
-                else
-                {
-                    if (i > 0)
-                    {
-                        yield return i.ToString();
-                        i = 0;
-                    }
-
-                    var left = _position.Move(_direction.TurnLeft());
-                    if (_grid.IsScaffold(left))
-                    {
-                        _direction = _direction.TurnLeft();
-                        yield return "L";
-                    }
-                    else
-                    {
-                        var right = _position.Move(_direction.TurnRight());
-                        if (_grid.IsScaffold(right))
-                        {
-                            _direction = _direction.TurnRight();
-                            yield return "R";
-                        }
-                        else
-                        {
-                            finished = true;
-                        }
-                    }
-                }
-            }
-        }
     }
 }

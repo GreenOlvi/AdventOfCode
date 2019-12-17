@@ -195,7 +195,38 @@ namespace AoC2019.Common
             WaitingForInput = false;
         }
 
+        public void AddInput(params long[] input)
+        {
+            foreach (var i in input)
+            {
+                _input.Enqueue(i);
+            }
+            WaitingForInput = false;
+        }
+
+        public void AddInput(string input)
+        {
+            foreach (var c in input)
+            {
+                AddInput(c);
+            }
+        }
+        public void AddInputAndRun(string input)
+        {
+            AddInput(input);
+            Run();
+        }
+
+        public void AddInputAndRun(long input)
+        {
+            AddInput(input);
+            Run();
+        }
+
+        public bool IsOutputReady() => _output.Any();
+
         public long GetOutput() => _output.Dequeue();
+
         public IEnumerable<long> GetAllOutput()
         {
             while (_output.Any())
@@ -203,6 +234,9 @@ namespace AoC2019.Common
                 yield return _output.Dequeue();
             }
         }
+
+        public string OutputAsString() =>
+            new string(GetAllOutput().Select(c => (char)c).ToArray());
 
         public void Run()
         {
@@ -216,12 +250,6 @@ namespace AoC2019.Common
             {
                 _ip = RunInstruction(_ip);
             }
-        }
-
-        public void AddInputAndRun(long input)
-        {
-            AddInput(input);
-            Run();
         }
     }
 }
