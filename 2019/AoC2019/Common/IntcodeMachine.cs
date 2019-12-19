@@ -195,6 +195,13 @@ namespace AoC2019.Common
             WaitingForInput = false;
         }
 
+        public void AddInput(long input1, long input2)
+        {
+            _input.Enqueue(input1);
+            _input.Enqueue(input2);
+            WaitingForInput = false;
+        }
+
         public long GetOutput() => _output.Dequeue();
         public IEnumerable<long> GetAllOutput()
         {
