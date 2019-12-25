@@ -195,14 +195,19 @@ namespace AoC2019.Common
             WaitingForInput = false;
         }
 
-        public void AddInput(long input1, long input2)
+        public void AddInput(params long[] input)
         {
-            _input.Enqueue(input1);
-            _input.Enqueue(input2);
+            foreach (var i in input)
+            {
+                _input.Enqueue(i);
+            }
             WaitingForInput = false;
         }
 
+        public bool HasOutput() => _output.Any();
+
         public long GetOutput() => _output.Dequeue();
+
         public IEnumerable<long> GetAllOutput()
         {
             while (_output.Any())
@@ -210,6 +215,8 @@ namespace AoC2019.Common
                 yield return _output.Dequeue();
             }
         }
+
+        public long PeekOutput() => _output.Peek();
 
         public void Run()
         {
