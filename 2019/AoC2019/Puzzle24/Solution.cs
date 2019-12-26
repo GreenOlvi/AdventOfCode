@@ -16,7 +16,7 @@ namespace AoC2019.Puzzle24
         private readonly bool[] _input;
 
         public static IEnumerable<bool> ParseInput(IEnumerable<string> input) =>
-            input.SelectMany(line => line.Where(c => c == '.' || c == '#').Select(c => c == '#'));
+            input.SelectMany(i => i.Split('/')).SelectMany(line => line.Where(c => c == '.' || c == '#' || c == '?').Select(c => c == '#'));
 
         public static uint GetGridHash(bool[] grid)
         {
@@ -100,18 +100,20 @@ namespace AoC2019.Puzzle24
             }
         }
 
-        public static uint Solve1(bool[] input)
+        public static uint Solve1(bool[] input) =>
+            FindDuplicate(GetGridHash(input));
+
+        public static int Solve2(bool[] input)
         {
             var hash = GetGridHash(input);
-            return FindDuplicate(hash);
+            var grids = new MultiGrid(hash).Steps(200);
+            return grids.CountBugs();
         }
 
         public Task<string> Solve1Async() =>
             Task.Run(() => Solve1(_input).ToString());
 
-        public Task<string> Solve2Async()
-        {
-            throw new NotImplementedException();
-        }
+        public Task<string> Solve2Async() =>
+            Task.Run(() => Solve2(_input).ToString());
     }
 }
