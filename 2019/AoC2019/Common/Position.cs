@@ -15,6 +15,8 @@ namespace AoC2019.Common
 
         public static Position From((int x, int y) p) => new Position(p.x, p.y);
 
+        public static Position From(int index, int width) => new Position(index % width, index / width);
+
         public Position Move(Direction direction) =>
             direction switch
             {

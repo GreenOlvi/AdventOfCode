@@ -13,6 +13,8 @@ namespace AoC2019.Common
 
     public static class DirectionExtensions
     {
+        public static Direction[] Directions = new[] { Direction.Up, Direction.Right, Direction.Down, Direction.Left };
+
         public static Direction TurnLeft(this Direction direction) =>
             direction switch
             {
