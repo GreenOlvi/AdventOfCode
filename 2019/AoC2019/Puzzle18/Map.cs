@@ -25,6 +25,8 @@ namespace AoC2019.Puzzle18
             _doors = indexed.Where(p => p.c >= 'A' && p.c <= 'Z')
                 .Select(p => (p.c, pos: Position.From(p.i, _width)))
                 .ToDictionary(p => p.c, p => p.pos);
+
+            _keyDeps = AnalyzeKeyDependencies(Start).ToArray();
         }
 
         private readonly char[] _map;
@@ -51,6 +53,8 @@ namespace AoC2019.Puzzle18
 
         public static ulong CombinedHash(IEnumerable<char> keys, char pos) => KeyHash(keys) | (((ulong)pos) << 32);
 
+        public CacheStats ShortestWayStats = new CacheStats();
+
         private readonly Dictionary<ulong, (char[], int)> _shortestWayCache = new Dictionary<ulong, (char[], int)>();
 
         public (char[] Path, int Steps) FindShortestWay(char from, char[] hasKeys)
@@ -58,32 +62,34 @@ namespace AoC2019.Puzzle18
             var hash = CombinedHash(hasKeys, from);
             if (_shortestWayCache.TryGetValue(hash, out var way))
             {
+                ShortestWayStats.IncHit();
                 return way;
             }
 
-            var available = AvailableKeysCached(hasKeys);
+            var available = AvailableKeysFast(hasKeys);
             if (!available.Any())
             {
                 return (new[] { from }, 0);
             }
 
             var min = (Path: Array.Empty<char>(), Steps: int.MaxValue);
-            var ways = new List<(char[], int)>();
             foreach (var key in available)
             {
                 var distance = GetDistance(from, key);
                 var (path, pathSteps) = FindShortestWay(key, hasKeys.Append(key).ToArray());
                 var totalSteps = pathSteps + distance;
-                ways.Add((path.Prepend(from).ToArray(), totalSteps));
                 if (totalSteps < min.Steps)
                 {
                     min = (path.Prepend(from).ToArray(), totalSteps);
                 }
             }
-            var m = ways.OrderBy(w => w.Item2).First();
-            _shortestWayCache.Add(hash, m);
+            _shortestWayCache.Add(hash, min);
+            ShortestWayStats.IncMiss();
             return min;
         }
+
+
+        public CacheStats AvailableKeysStats = new CacheStats();
 
         private readonly Dictionary<uint, char[]> _availableKeys = new Dictionary<uint, char[]>();
         private char[] AvailableKeysCached(char[] hasKeys)
@@ -91,21 +97,23 @@ namespace AoC2019.Puzzle18
             var hash = KeyHash(hasKeys);
             if (_availableKeys.TryGetValue(hash, out var keys))
             {
+                AvailableKeysStats.IncHit();
                 return keys;
             }
 
-            var available = AvailableKeys(hasKeys).OrderBy(k => k).ToArray();
+            var available = AvailableKeys(Start, hasKeys).OrderBy(k => k).ToArray();
             _availableKeys.Add(hash, available);
+            AvailableKeysStats.IncMiss();
             return available;
         }
 
-        public IEnumerable<char> AvailableKeys(char[] hasKeys)
+        public IEnumerable<char> AvailableKeys(Position from, char[] hasKeys)
         {
             var openDoors = hasKeys.Select(k => (char)(k - 0x20)).ToHashSet();
 
             var visited = new HashSet<Position>();
             var stack = new Stack<Position>();
-            stack.Push(Start);
+            stack.Push(from);
 
             while (stack.Any())
             {
@@ -132,6 +140,64 @@ namespace AoC2019.Puzzle18
             }
         }
 
+
+        private readonly (char Key, uint Hash)[] _keyDeps;
+
+        private IEnumerable<(char Key, uint Hash)> AnalyzeKeyDependencies(Position from)
+        {
+            var visited = new HashSet<Position>();
+            var queue = new Queue<(Position Position, uint Keys)>();
+            queue.Enqueue((from, 0u));
+
+            while (queue.Any())
+            {
+                var (p, k) = queue.Dequeue();
+                visited.Add(p);
+
+                foreach (var newPos in p.Neighbours())
+                {
+                    var c = Get(newPos);
+
+                    if (visited.Contains(newPos) || IsWall(c))
+                    {
+                        continue;
+                    }
+
+                    if (IsDoor(c))
+                    {
+                        k = AddKey(k, c);
+                    }
+
+                    if (IsKey(c))
+                    {
+                        yield return (c, k);
+                    }
+
+                    queue.Enqueue((newPos, k));
+                }
+            }
+        }
+
+        private uint AddKey(uint k, char c)
+        {
+            var i = (c & 0x1f) - 1;
+            return k | (1u << i);
+        }
+
+        private bool HasKey(uint k, char c)
+        {
+            var i = (c & 0x1f) - 1;
+            return (k & i) > 0;
+        }
+
+        public IEnumerable<char> AvailableKeysFast(char[] hasKeys)
+        {
+            var hash = KeyHash(hasKeys);
+            return _keyDeps.Where(kd => ((kd.Hash & hash) == kd.Hash) && ((AddKey(0u, kd.Key) & hash) == 0))
+                .Select(kd => kd.Key);
+        }
+
+
         private readonly Dictionary<char, Dictionary<char, int>> _distances = new Dictionary<char, Dictionary<char, int>>();
         public int GetDistance(char from, char to)
         {
@@ -153,12 +219,12 @@ namespace AoC2019.Puzzle18
                 { from, 0 },
             };
 
-            var stack = new Stack<Position>();
-            stack.Push(from);
+            var queue = new Queue<Position>();
+            queue.Enqueue(from);
 
-            while (stack.Any())
+            while (queue.Any())
             {
-                var p = stack.Pop();
+                var p = queue.Dequeue();
                 var d = dist[p];
 
                 foreach (var dir in DirectionExtensions.Directions)
@@ -175,7 +241,7 @@ namespace AoC2019.Puzzle18
                     {
                         if (currDist > d + 1)
                         {
-                            stack.Push(newPos);
+                            queue.Enqueue(newPos);
                             dist[newPos] = d + 1;
                         }
                         else
@@ -185,7 +251,7 @@ namespace AoC2019.Puzzle18
                     }
                     else
                     {
-                        stack.Push(newPos);
+                        queue.Enqueue(newPos);
                         dist[newPos] = d + 1;
                     }
                 }
@@ -193,6 +259,7 @@ namespace AoC2019.Puzzle18
 
             return _keys.Select(kv => (kv.Key, dist[kv.Value]));
         }
+
 
         public char Get(Position position) => _map[position.Y * _width + position.X];
 
@@ -214,6 +281,22 @@ namespace AoC2019.Puzzle18
                 ch.AddRange(line);
             }
             return new Map(ch.ToArray(), width);
+        }
+
+        public static Map ModifyAndParse(IEnumerable<string> input)
+        {
+            var lines = input.ToArray();
+            var w = lines[0].Trim().Length;
+
+            var midLine = lines.Select((l, i) => (l, i)).First(line => line.l.Contains(".@."));
+            var x = midLine.l.IndexOf('@');
+            var y = midLine.i;
+
+            lines[y - 1] = lines[y - 1].Remove(x - 1, 3).Insert(x - 1, "@#@");
+            lines[y] = lines[y].Remove(x - 1, 3).Insert(x - 1, "###");
+            lines[y + 1] = lines[y + 1].Remove(x - 1, 3).Insert(x - 1, "@#@");
+
+            return Parse(lines);
         }
 
         public string Draw()

@@ -17,16 +17,19 @@ namespace AoC2019.Puzzle18
         public static int Solve1(string[] input)
         {
             var map = Map.Parse(input.ToArray());
-            var (p, steps) = map.FindShortestWay('@', Array.Empty<char>());
+            var (_, steps) = map.FindShortestWay('@', Array.Empty<char>());
             return steps;
+        }
+
+        public static int Solve2(string[] input)
+        {
+            return 0;
         }
 
         public Task<string> Solve1Async() =>
             Task.Run(() => Solve1(_input).ToString());
 
-        public Task<string> Solve2Async()
-        {
-            throw new NotImplementedException();
-        }
+        public Task<string> Solve2Async() =>
+            Task.Run(() => Solve2(_input).ToString());
     }
 }

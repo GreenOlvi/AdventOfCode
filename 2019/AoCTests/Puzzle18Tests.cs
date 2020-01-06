@@ -5,6 +5,7 @@ using NUnit.Framework;
 using FluentAssertions;
 using AoC2019.Puzzle18;
 using AoC2019.Common;
+using System.Linq;
 
 namespace AoCTests
 {
@@ -76,12 +77,22 @@ namespace AoCTests
                 new TestCaseData("a", _smallMap, "b"),
                 new TestCaseData("ba", _smallMap, ""),
                 new TestCaseData("", _map4, "cebfagdh"),
+                new TestCaseData("abge", _map4, "cdfhijkn"),
             };
 
         [TestCaseSource(nameof(AvailableKeysTestCases))]
         public void AvailableKeysTests(string hasKeys, string[] map, string expected)
         {
-            Map.Parse(map).AvailableKeys(hasKeys.ToCharArray())
+            var m = Map.Parse(map);
+            m.AvailableKeys(m.Start, hasKeys.ToCharArray())
+                .Should().BeEquivalentTo(expected.ToCharArray(), o => o.WithoutStrictOrdering());
+        }
+
+        [TestCaseSource(nameof(AvailableKeysTestCases))]
+        public void AvailableKeysFastTests(string hasKeys, string[] map, string expected)
+        {
+            var m = Map.Parse(map);
+            m.AvailableKeysFast(hasKeys.ToCharArray())
                 .Should().BeEquivalentTo(expected.ToCharArray(), o => o.WithoutStrictOrdering());
         }
 

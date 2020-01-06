@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace AoC2019.Common
 {
@@ -26,6 +28,12 @@ namespace AoC2019.Common
                 Direction.Right => new Position(X + 1, Y),
                 _ => throw new ArgumentException("Invalid direction", nameof(direction)),
             };
+
+        public IEnumerable<Position> Neighbours()
+        {
+            var pos = this;
+            return DirectionExtensions.Directions.Select(d => pos.Move(d));
+        }
 
         public override string ToString() => $"({X},{Y})";
 
