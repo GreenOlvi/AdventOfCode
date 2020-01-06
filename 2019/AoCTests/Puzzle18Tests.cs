@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using NUnit.Framework;
 using FluentAssertions;
 using AoC2019.Puzzle18;
 using AoC2019.Common;
-using System.Linq;
 
 namespace AoCTests
 {
     [TestFixture]
     public class Puzzle18Tests
     {
+        #region Examples
         private static readonly string[] _smallMap = new[]
         {
             "#########",
@@ -60,11 +59,69 @@ namespace AoCTests
             "########################",
         };
 
+        private static readonly string[] _multi1 = new[]
+        {
+            "#######",
+            "#a.#Cd#",
+            "##...##",
+            "##.@.##",
+            "##...##",
+            "#cB#Ab#",
+            "#######",
+        };
+
+        private static readonly string[] _multi1mod = new[]
+        {
+            "#######",
+            "#a.#Cd#",
+            "##@#@##",
+            "#######",
+            "##@#@##",
+            "#cB#Ab#",
+            "#######",
+        };
+
+        private static readonly string[] _multi2 = new[]
+        {
+            "###############",
+            "#d.ABC.#.....a#",
+            "######@#@######",
+            "###############",
+            "######@#@######",
+            "#b.....#.....c#",
+            "###############",
+        };
+
+        private static readonly string[] _multi3 = new[]
+        {
+            "#############",
+            "#DcBa.#.GhKl#",
+            "#.###@#@#I###",
+            "#e#d#####j#k#",
+            "###C#@#@###J#",
+            "#fEbA.#.FgHi#",
+            "#############",
+        };
+
+        private static readonly string[] _multi4 = new[]
+        {
+            "#############",
+            "#g#f.D#..h#l#",
+            "#F###e#E###.#",
+            "#dCba@#@BcIJ#",
+            "#############",
+            "#nK.L@#@G...#",
+            "#M###N#H###.#",
+            "#o#m..#i#jk.#",
+            "#############",
+        };
+        #endregion
+
         [Test]
         public void MapAllKeysTest()
         {
             var m = Map.Parse(_smallMap);
-            m.Start.Should().Be(new Position(5, 1));
+            m.Start.Should().BeEquivalentTo(new Position(5, 1));
             m.AllKeys.Should().BeEquivalentTo(new[] { new Position(7, 1), new Position(1, 1) });
             m.AllDoors.Should().BeEquivalentTo(new[] { new Position(3, 1) });
         }
@@ -78,15 +135,9 @@ namespace AoCTests
                 new TestCaseData("ba", _smallMap, ""),
                 new TestCaseData("", _map4, "cebfagdh"),
                 new TestCaseData("abge", _map4, "cdfhijkn"),
+                new TestCaseData("", _multi3, "a"),
+                new TestCaseData("abcdefghi", _multi3, "j"),
             };
-
-        [TestCaseSource(nameof(AvailableKeysTestCases))]
-        public void AvailableKeysTests(string hasKeys, string[] map, string expected)
-        {
-            var m = Map.Parse(map);
-            m.AvailableKeys(m.Start, hasKeys.ToCharArray())
-                .Should().BeEquivalentTo(expected.ToCharArray(), o => o.WithoutStrictOrdering());
-        }
 
         [TestCaseSource(nameof(AvailableKeysTestCases))]
         public void AvailableKeysFastTests(string hasKeys, string[] map, string expected)
@@ -145,6 +196,22 @@ namespace AoCTests
         {
             var (path, _) = Map.Parse(map).FindShortestWay('@', Array.Empty<char>());
             string.Join("", path).Should().Be("@" + expected);
+        }
+
+        private static IEnumerable<TestCaseData> Solve2TestCases() =>
+            new[]
+            {
+                new TestCaseData(_multi1, 8),
+                new TestCaseData(_multi1mod, 8),
+                new TestCaseData(_multi2, 24),
+                new TestCaseData(_multi3, 32),
+                new TestCaseData(_multi4, 72),
+            };
+
+        [TestCaseSource(nameof(Solve2TestCases))]
+        public void Solve2Test(string[] map, int steps)
+        {
+            Solution.Solve2(map).Should().Be(steps);
         }
 
 

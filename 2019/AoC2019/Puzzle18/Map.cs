@@ -16,7 +16,7 @@ namespace AoC2019.Puzzle18
 
             var indexed = input.Select((c, i) => (c, i)).ToArray();
 
-            Start = Position.From(indexed.First(p => p.c == '@').i, _width);
+            Start = indexed.Where(p => p.c == '@').Select(p => Position.From(p.i, _width)).ToArray();
 
             _keys = indexed.Where(p => p.c >= 'a' && p.c <= 'z')
                 .Select(p => (p.c, pos: Position.From(p.i, _width)))
@@ -26,7 +26,9 @@ namespace AoC2019.Puzzle18
                 .Select(p => (p.c, pos: Position.From(p.i, _width)))
                 .ToDictionary(p => p.c, p => p.pos);
 
-            _keyDeps = AnalyzeKeyDependencies(Start).ToArray();
+            var deps = Start.Select(p => BuildKeyDependencies(p).ToArray()).ToArray();
+            _keySection = deps.SelectMany((d, i) => d.Select(k => (k.Key, i))).ToDictionary(k => k.Key, k => k.i);
+            _keyDeps = deps.SelectMany(d => d).ToArray();
         }
 
         private readonly char[] _map;
@@ -35,10 +37,13 @@ namespace AoC2019.Puzzle18
 
         private readonly Dictionary<char, Position> _keys;
         private readonly Dictionary<char, Position> _doors;
+        private readonly Dictionary<char, int> _keySection;
 
-        public Position Start { get; }
+
+        public Position[] Start { get; }
         public IEnumerable<Position> AllKeys => _keys.OrderBy(k => k.Key).Select(k => k.Value);
         public IEnumerable<Position> AllDoors => _doors.OrderBy(k => k.Key).Select(k => k.Value);
+
 
         public static uint KeyHash(IEnumerable<char> keys)
         {
@@ -50,12 +55,18 @@ namespace AoC2019.Puzzle18
             }
             return hash;
         }
-
         public static ulong CombinedHash(IEnumerable<char> keys, char pos) => KeyHash(keys) | (((ulong)pos) << 32);
+        public static ulong CombinedHash(IEnumerable<char> keys, IEnumerable<char> pos)
+        {
+            var posHash = pos.Aggregate(0ul, (h, p) => (h << 8) | p);
+            return KeyHash(keys) | (posHash << 32);
+        }
 
         public CacheStats ShortestWayStats = new CacheStats();
 
         private readonly Dictionary<ulong, (char[], int)> _shortestWayCache = new Dictionary<ulong, (char[], int)>();
+
+        public (char[] Path, int Steps) FindShortestWay() => FindShortestWay('@', Array.Empty<char>());
 
         public (char[] Path, int Steps) FindShortestWay(char from, char[] hasKeys)
         {
@@ -89,91 +100,78 @@ namespace AoC2019.Puzzle18
         }
 
 
-        public CacheStats AvailableKeysStats = new CacheStats();
+        private readonly Dictionary<ulong, (string[], int)> _shortestWaySectionsCache = new Dictionary<ulong, (string[], int)>();
+        public (string[] Path, int Steps) FindShortestWayMultiple() =>
+            FindShortestWayMultiple("@@@@", Array.Empty<char>());
 
-        private readonly Dictionary<uint, char[]> _availableKeys = new Dictionary<uint, char[]>();
-        private char[] AvailableKeysCached(char[] hasKeys)
+        public (string[] Path, int Steps) FindShortestWayMultiple(string from, char[] hasKeys)
         {
-            var hash = KeyHash(hasKeys);
-            if (_availableKeys.TryGetValue(hash, out var keys))
+            var hash = CombinedHash(hasKeys, from);
+            if (_shortestWaySectionsCache.TryGetValue(hash, out var way))
             {
-                AvailableKeysStats.IncHit();
-                return keys;
+                ShortestWayStats.IncHit();
+                return way;
             }
 
-            var available = AvailableKeys(Start, hasKeys).OrderBy(k => k).ToArray();
-            _availableKeys.Add(hash, available);
-            AvailableKeysStats.IncMiss();
-            return available;
-        }
-
-        public IEnumerable<char> AvailableKeys(Position from, char[] hasKeys)
-        {
-            var openDoors = hasKeys.Select(k => (char)(k - 0x20)).ToHashSet();
-
-            var visited = new HashSet<Position>();
-            var stack = new Stack<Position>();
-            stack.Push(from);
-
-            while (stack.Any())
+            var available = AvailableKeysFast(hasKeys);
+            if (!available.Any())
             {
-                var p = stack.Pop();
-                visited.Add(p);
+                return (new[] { from }, 0);
+            }
 
-                foreach (var dir in DirectionExtensions.Directions)
+            var min = (Path: Array.Empty<string>(), Steps: int.MaxValue);
+            foreach (var key in available)
+            {
+                var section = _keySection[key];
+                var distance = GetDistance(from[section], key);
+                var newFrom = ReplaceCharAt(from, section, key);
+
+                var (path, pathSteps) = FindShortestWayMultiple(newFrom, hasKeys.Append(key).ToArray());
+                var totalSteps = pathSteps + distance;
+                if (totalSteps < min.Steps)
                 {
-                    var newPos = p.Move(dir);
-                    var c = Get(newPos);
-
-                    if (visited.Contains(newPos) || IsWall(c) || (IsDoor(c) && !openDoors.Contains(c)))
-                    {
-                        continue;
-                    }
-
-                    if (IsKey(c) && !openDoors.Contains((char)(c - 0x20)))
-                    {
-                        yield return c;
-                    }
-
-                    stack.Push(newPos);
+                    min = (path.Prepend(from).ToArray(), totalSteps);
                 }
             }
+            _shortestWaySectionsCache.Add(hash, min);
+            ShortestWayStats.IncMiss();
+            return min;
         }
+
+        private string ReplaceCharAt(string str, int index, char value) =>
+            new StringBuilder(str).Remove(index, 1).Insert(index, value).ToString();
 
 
         private readonly (char Key, uint Hash)[] _keyDeps;
 
-        private IEnumerable<(char Key, uint Hash)> AnalyzeKeyDependencies(Position from)
+        private IEnumerable<(char Key, uint Hash)> BuildKeyDependencies(Position from)
         {
             var visited = new HashSet<Position>();
             var queue = new Queue<(Position Position, uint Keys)>();
             queue.Enqueue((from, 0u));
+            visited.Add(from);
 
             while (queue.Any())
             {
                 var (p, k) = queue.Dequeue();
-                visited.Add(p);
 
                 foreach (var newPos in p.Neighbours())
                 {
                     var c = Get(newPos);
-
                     if (visited.Contains(newPos) || IsWall(c))
                     {
                         continue;
                     }
+                    visited.Add(newPos);
 
-                    if (IsDoor(c))
-                    {
-                        k = AddKey(k, c);
-                    }
+                    var keyReq = IsDoor(c) ? AddKey(k, c) : k;
 
                     if (IsKey(c))
                     {
-                        yield return (c, k);
+                        yield return (c, keyReq);
                     }
 
-                    queue.Enqueue((newPos, k));
+                    queue.Enqueue((newPos, keyReq));
                 }
             }
         }
@@ -184,12 +182,6 @@ namespace AoC2019.Puzzle18
             return k | (1u << i);
         }
 
-        private bool HasKey(uint k, char c)
-        {
-            var i = (c & 0x1f) - 1;
-            return (k & i) > 0;
-        }
-
         public IEnumerable<char> AvailableKeysFast(char[] hasKeys)
         {
             var hash = KeyHash(hasKeys);
@@ -198,17 +190,17 @@ namespace AoC2019.Puzzle18
         }
 
 
-        private readonly Dictionary<char, Dictionary<char, int>> _distances = new Dictionary<char, Dictionary<char, int>>();
+        private readonly Dictionary<Position, Dictionary<char, int>> _distances = new Dictionary<Position, Dictionary<char, int>>();
         public int GetDistance(char from, char to)
         {
-            if (_distances.TryGetValue(from, out var dist))
+            var pos = from == '@' ? Start[_keySection[to]] : _keys[from];
+            if (_distances.TryGetValue(pos, out var dist))
             {
                 return dist[to];
             }
 
-            var pos = from == '@' ? Start : _keys[from];
             var dists = GetDistancesDijkstra(pos).ToDictionary(d => d.Key, d => d.Distance);
-            _distances.Add(from, dists);
+            _distances.Add(pos, dists);
             return dists[to];
         }
 
@@ -257,7 +249,8 @@ namespace AoC2019.Puzzle18
                 }
             }
 
-            return _keys.Select(kv => (kv.Key, dist[kv.Value]));
+            return _keys.Where(kv => dist.ContainsKey(kv.Value))
+                .Select(kv => (kv.Key, dist[kv.Value]));
         }
 
 
@@ -288,13 +281,16 @@ namespace AoC2019.Puzzle18
             var lines = input.ToArray();
             var w = lines[0].Trim().Length;
 
-            var midLine = lines.Select((l, i) => (l, i)).First(line => line.l.Contains(".@."));
-            var x = midLine.l.IndexOf('@');
-            var y = midLine.i;
+            if (!lines.Any(l => l.Contains("@#@"))) // skip if already modified
+            {
+                var midLine = lines.Select((l, i) => (l, i)).First(line => line.l.Contains(".@."));
+                var x = midLine.l.IndexOf('@');
+                var y = midLine.i;
 
-            lines[y - 1] = lines[y - 1].Remove(x - 1, 3).Insert(x - 1, "@#@");
-            lines[y] = lines[y].Remove(x - 1, 3).Insert(x - 1, "###");
-            lines[y + 1] = lines[y + 1].Remove(x - 1, 3).Insert(x - 1, "@#@");
+                lines[y - 1] = lines[y - 1].Remove(x - 1, 3).Insert(x - 1, "@#@");
+                lines[y] = lines[y].Remove(x - 1, 3).Insert(x - 1, "###");
+                lines[y + 1] = lines[y + 1].Remove(x - 1, 3).Insert(x - 1, "@#@");
+            }
 
             return Parse(lines);
         }
