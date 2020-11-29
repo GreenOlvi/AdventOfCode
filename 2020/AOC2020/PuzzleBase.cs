@@ -9,5 +9,8 @@ namespace AOC2020
 
         public Task<string> Solve1() => Task.Run(() => Solution1().ToString());
         public Task<string> Solve2() => Task.Run(() => Solution2().ToString());
+
+        public virtual string GetProgress1() => null;
+        public virtual string GetProgress2() => null;
     }
 }

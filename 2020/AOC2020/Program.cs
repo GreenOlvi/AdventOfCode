@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using System.Timers;
 
 namespace AOC2020
 {
@@ -11,6 +12,8 @@ namespace AOC2020
         private const string InputPath = "input";
 
         private static readonly Dictionary<int, Func<string, IPuzzle>> _puzzles = new Dictionary<int, Func<string, IPuzzle>>();
+
+        private static readonly TimeSpan ProgressTimerDelay = TimeSpan.FromSeconds(10);
 
         internal static async Task<int> Main(string[] args)
         {
@@ -27,25 +30,60 @@ namespace AOC2020
             }
 
             Console.WriteLine($"Running day {day:00}, input {file}");
-
-            var puzzle = _puzzles[day](file);
-
-            Console.WriteLine($"Solving part 1...");
-            var stopwatch = Stopwatch.StartNew();
-            var result1 = await puzzle.Solve1();
-            stopwatch.Stop();
-            Console.WriteLine($"Result 1 = {result1}");
-            Console.WriteLine($"Took {stopwatch.Elapsed}");
             Console.WriteLine();
 
-            Console.WriteLine($"Solving part 2...");
-            stopwatch.Restart();
-            var result2 = await puzzle.Solve2();
-            stopwatch.Stop();
-            Console.WriteLine($"Result 2 = {result2}");
-            Console.WriteLine($"Took {stopwatch.Elapsed}");
+            var puzzle = _puzzles[day](file);
+            var stopwatch = new Stopwatch();
+
+            using (var timer = SetTimer(() => puzzle.GetProgress1()))
+            {
+                Console.WriteLine($"Solving part 1...");
+                stopwatch.Start();
+                var result1 = await puzzle.Solve1();
+                stopwatch.Stop();
+                timer.Stop();
+                Console.WriteLine();
+                Console.WriteLine($"Result 1 = {result1}");
+                Console.WriteLine($"Took {stopwatch.Elapsed}");
+            }
+
+            Console.WriteLine();
+
+            using (var timer = SetTimer(() => puzzle.GetProgress2()))
+            {
+                Console.WriteLine($"Solving part 2...");
+                stopwatch.Restart();
+                var result2 = await puzzle.Solve2();
+                stopwatch.Stop();
+                timer.Stop();
+                Console.WriteLine();
+                Console.WriteLine($"Result 2 = {result2}");
+                Console.WriteLine($"Took {stopwatch.Elapsed}");
+            }
 
             return 0;
+        }
+
+        private static Timer SetTimer(Func<string> progressMethod)
+        {
+            var timer = new Timer(ProgressTimerDelay.TotalMilliseconds)
+            {
+                AutoReset = true,
+                Enabled = true,
+            };
+            timer.Elapsed += (sender, e) =>
+            {
+                var p = progressMethod();
+                if (p != null)
+                {
+                    Console.WriteLine(p);
+                }
+                else
+                {
+                    Console.Write(".");
+                }
+            };
+            return timer;
         }
 
         private static bool TryParseArgs(string[] args, out (int Day, string Path) inputArgs)

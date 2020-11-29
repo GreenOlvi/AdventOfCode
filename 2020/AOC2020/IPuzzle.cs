@@ -6,5 +6,7 @@ namespace AOC2020
     {
         Task<string> Solve1();
         Task<string> Solve2();
+        string GetProgress1();
+        string GetProgress2();
     }
 }
