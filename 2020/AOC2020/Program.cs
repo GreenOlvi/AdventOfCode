@@ -67,7 +67,7 @@ namespace AOC2020
             return 0;
         }
 
-        private static Timer SetTimer(Func<string> progressMethod)
+        private static Timer SetTimer(Func<string?> progressMethod)
         {
             var timer = new Timer(ProgressTimerDelay.TotalMilliseconds)
             {

@@ -7,45 +7,36 @@ namespace AOC2020.Puzzle01
     {
         public P01(IEnumerable<int> input)
         {
-            _input = input.ToArray();
+            _input = input.ToHashSet();
         }
 
-        private readonly int[] _input;
+        private readonly HashSet<int> _input;
 
-        private IEnumerable<(int, int)> GetPairs()
+        private IEnumerable<(int, int)> GetPairs(int sum)
         {
-            foreach (var a in _input)
-            {
-                foreach (var b in _input.Where(i => a + i == 2020))
-                {
-                    yield return (a, b);
-                }
-            }
+            return _input.Where(a => _input.Contains(sum - a)).Select(a => (a, sum - a));
         }
 
-        protected override int Solution1()
+        public override int Solution1()
         {
-            var (a, b) = GetPairs().First();
+            var (a, b) = GetPairs(2020).First();
             return a * b;
         }
 
-        private IEnumerable<(int, int, int)> GetThrees()
+        private IEnumerable<(int, int, int)> GetThrees(int sum)
         {
             foreach (var a in _input)
             {
-                foreach (var b in _input.Where(i => a + i < 2020))
+                foreach (var (b, c) in GetPairs(sum - a))
                 {
-                    foreach (var c in _input.Where(i => a + b + i == 2020))
-                    {
-                        yield return (a, b, c);
-                    }
+                    yield return (a, b, c);
                 }
             }
         }
 
-        protected override int Solution2()
+        public override int Solution2()
         {
-            var (a, b, c) = GetThrees().First();
+            var (a, b, c) = GetThrees(2020).First();
             return a * b * c;
         }
     }
