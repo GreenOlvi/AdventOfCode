@@ -1,13 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace AOC2020
 {
     public static class Utils
     {
-
+        public static IEnumerable<int> ParseInts(this IEnumerable<string> lines)
+        {
+            foreach (var line in lines)
+            {
+                yield return int.Parse(line);
+            }
+        }
     }
 }

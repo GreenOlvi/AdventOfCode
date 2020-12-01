@@ -11,7 +11,10 @@ namespace AOC2020
     {
         private const string InputPath = "input";
 
-        private static readonly Dictionary<int, Func<string, IPuzzle>> _puzzles = new Dictionary<int, Func<string, IPuzzle>>();
+        private static readonly Dictionary<int, Func<string, IPuzzle>> _puzzles = new Dictionary<int, Func<string, IPuzzle>>
+        {
+            { 1, i => new Puzzle01.P01(File.ReadAllLines(i).ParseInts()) }
+        };
 
         private static readonly TimeSpan ProgressTimerDelay = TimeSpan.FromSeconds(10);
 
