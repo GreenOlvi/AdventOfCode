@@ -12,7 +12,7 @@ namespace AOC2020.Puzzle01
 
         private readonly HashSet<int> _input;
 
-        private IEnumerable<(int, int)> GetPairs(int sum)
+        public IEnumerable<(int, int)> GetPairs(int sum)
         {
             return _input.Where(a => _input.Contains(sum - a)).Select(a => (a, sum - a));
         }
@@ -23,7 +23,7 @@ namespace AOC2020.Puzzle01
             return a * b;
         }
 
-        private IEnumerable<(int, int, int)> GetThrees(int sum)
+        public IEnumerable<(int, int, int)> GetThrees(int sum)
         {
             foreach (var a in _input)
             {
