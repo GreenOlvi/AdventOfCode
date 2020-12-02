@@ -250,3 +250,4 @@ Session.vim
 !.vscode/launch.json
 !.vscode/extensions.json
 
+**/.ionide/*
