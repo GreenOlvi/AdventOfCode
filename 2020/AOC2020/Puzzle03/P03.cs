@@ -8,65 +8,30 @@ namespace AOC2020.Puzzle03
         public P03(IEnumerable<string> input)
         {
             _input = input.ToArray();
+            _width = _input[0].Length;
         }
 
         private readonly string[] _input;
+        private readonly int _width;
 
-        public override int Solution1()
+        private IEnumerable<(int X, int Y)> SlopeTiles(int dx, int dy)
         {
-            var trees = 0;
-            var x = 0;
-
-            foreach (var line in _input.Skip(1))
+            var a = (.0 + dx) / dy;
+            for (var y = 0; y < _width; y += dy)
             {
-                x += 3;
-                if (x >= line.Length)
-                {
-                    x -= line.Length;
-                }
-                
-                if (line[x] == '#')
-                {
-                    trees++;
-                }
+                var x = (int)(y * a) % _input[0].Length;
+                yield return (x, y);
             }
-
-            return trees;
         }
 
-        private long CheckSlope(int dx, int dy)
-        {
-            var trees = 0;
-            var x = 0;
-            var y = 0;
+        public int CountTrees(int dx, int dy) =>
+            SlopeTiles(dx, dy).Count(p => _input[p.Y][p.X] == '#');
 
-            while (y < _input.Length)
-            {
-                if (_input[y][x] == '#')
-                {
-                    trees++;
-                }
+        public override int Solution1() => CountTrees(3, 1);
 
-                y += dy;
-                x += dx;
-
-                if (x >= _input[0].Length)
-                {
-                    x -= _input[0].Length;
-                }
-
-            }
-
-            return trees;
-        }
-
-        public override long Solution2()
-        {
-            return CheckSlope(1, 1)
-                * CheckSlope(3, 1)
-                * CheckSlope(5, 1)
-                * CheckSlope(7, 1)
-                * CheckSlope(1, 2);
-        }
+        public override long Solution2() =>
+            new (int X, int Y)[] { (1, 1), (3, 1), (5, 1), (7, 1), (1, 2) }
+                .Select(p => CountTrees(p.X, p.Y))
+                .Aggregate(1L, (a, b) => a * b);
     }
 }
