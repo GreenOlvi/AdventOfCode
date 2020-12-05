@@ -17,6 +17,7 @@ namespace AOC2020
             { 2, i => new Puzzle02.P02(File.ReadAllLines(i)) },
             { 3, i => new Puzzle03.P03(File.ReadAllLines(i)) },
             { 4, i => new Puzzle04.P04(File.ReadAllLines(i)) },
+            { 5, i => new Puzzle05.P05(File.ReadAllLines(i)) },
         };
 
         private static readonly TimeSpan ProgressTimerDelay = TimeSpan.FromSeconds(10);
