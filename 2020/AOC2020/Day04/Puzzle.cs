@@ -14,28 +14,6 @@ namespace AOC2020.Day04
 
         private readonly string[] _input;
 
-        public static IEnumerable<Dictionary<string, string>> SplitPassports(IEnumerable<string> input)
-        {
-            var current = new List<string>();
-            foreach (var line in input)
-            {
-                if (line == string.Empty && current.Any())
-                {
-                    yield return SplitFields(current);
-                    current.Clear();
-                }
-                else
-                {
-                    current.Add(line);
-                }
-            }
-
-            if (current.Any())
-            {
-                yield return SplitFields(current);
-            }
-        }
-
         private static Dictionary<string, string> SplitFields(IEnumerable<string> lines) =>
             lines.SelectMany(line => line.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                     .Select(e => e.Split(':')))
@@ -104,8 +82,8 @@ namespace AOC2020.Day04
 
         private static bool HasRequiredFields(Dictionary<string, string> p) => requiredFields.All(r => p.ContainsKey(r));
 
-        public override int Solution1() => SplitPassports(_input).Count(p => HasRequiredFields(p));
+        public override int Solution1() => _input.SplitGroups().Select(SplitFields).Count(p => HasRequiredFields(p));
 
-        public override int Solution2() => SplitPassports(_input).Count(p => HasRequiredFields(p) && HasValidFields(p));
+        public override int Solution2() => _input.SplitGroups().Select(SplitFields).Count(p => HasRequiredFields(p) && HasValidFields(p));
     }
 }
