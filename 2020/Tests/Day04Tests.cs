@@ -1,11 +1,11 @@
 ﻿using NUnit.Framework;
 using FluentAssertions;
-using AOC2020.Puzzle04;
+using AOC2020.Day04;
 
 namespace Tests
 {
     [TestFixture]
-    public class Puzzle04Tests
+    public class Day04Tests
     {
         private static readonly string[] ExampleData =
         {
@@ -24,7 +24,7 @@ namespace Tests
             "iyr:2011 ecl:brn hgt:59in",
         };
 
-        private readonly P04 _example = new P04(ExampleData);
+        private readonly Puzzle _example = new Puzzle(ExampleData);
 
         [Test]
         public void Solution1Test()
@@ -71,7 +71,7 @@ namespace Tests
         [TestCase("pid", "093154719")]
         public void ValidFieldTests(string name, string value)
         {
-            P04.IsFieldValid(name, value).Should().BeTrue();
+            Puzzle.IsFieldValid(name, value).Should().BeTrue();
         }
 
         [TestCase("byr", "2003")]
@@ -87,7 +87,7 @@ namespace Tests
         [TestCase("eyr", "2031")]
         public void InvalidFieldTests(string name, string value)
         {
-            P04.IsFieldValid(name, value).Should().BeFalse();
+            Puzzle.IsFieldValid(name, value).Should().BeFalse();
         }
     }
 }

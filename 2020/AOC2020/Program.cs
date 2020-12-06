@@ -13,11 +13,11 @@ namespace AOC2020
 
         private static readonly Dictionary<int, Func<string, IPuzzle>> _puzzles = new Dictionary<int, Func<string, IPuzzle>>
         {
-            { 1, i => new Puzzle01.P01(File.ReadAllLines(i).ParseInts()) },
-            { 2, i => new Puzzle02.P02(File.ReadAllLines(i)) },
-            { 3, i => new Puzzle03.P03(File.ReadAllLines(i)) },
-            { 4, i => new Puzzle04.P04(File.ReadAllLines(i)) },
-            { 5, i => new Puzzle05.P05(File.ReadAllLines(i)) },
+            { 1, i => new Day01.Puzzle(File.ReadAllLines(i).ParseInts()) },
+            { 2, i => new Day02.Puzzle(File.ReadAllLines(i)) },
+            { 3, i => new Day03.Puzzle(File.ReadAllLines(i)) },
+            { 4, i => new Day04.Puzzle(File.ReadAllLines(i)) },
+            { 5, i => new Day05.Puzzle(File.ReadAllLines(i)) },
         };
 
         private static readonly TimeSpan ProgressTimerDelay = TimeSpan.FromSeconds(10);

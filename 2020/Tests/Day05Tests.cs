@@ -1,11 +1,11 @@
 ﻿using NUnit.Framework;
 using FluentAssertions;
-using AOC2020.Puzzle05;
+using AOC2020.Day05;
 
 namespace Tests
 {
     [TestFixture]
-    public class Puzzle05Tests
+    public class Day05Tests
     {
         [TestCase("FBFBBFFRLR", 357)]
         [TestCase("BFFFBBFRRR", 567)]
@@ -13,7 +13,7 @@ namespace Tests
         [TestCase("BBFFBBFRLL", 820)]
         public void GetSeatIdTests(string line, int id)
         {
-            P05.GetSeatId(line).Should().Be(id);
+            Puzzle.GetSeatId(line).Should().Be(id);
         }
     }
 }

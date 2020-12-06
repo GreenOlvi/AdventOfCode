@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace AOC2020.Puzzle04
+namespace AOC2020.Day04
 {
-    public class P04 : PuzzleBase<int, int>
+    public class Puzzle : PuzzleBase<int, int>
     {
-        public P04(IEnumerable<string> input)
+        public Puzzle(IEnumerable<string> input)
         {
             _input = input.ToArray();
         }

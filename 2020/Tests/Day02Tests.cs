@@ -1,11 +1,11 @@
 ﻿using NUnit.Framework;
 using FluentAssertions;
-using AOC2020.Puzzle02;
+using AOC2020.Day02;
 
 namespace Tests
 {
     [TestFixture]
-    public class Puzzle02Tests
+    public class Day02Tests
     {
         private static readonly string[] ExampleData =
         {
@@ -17,7 +17,7 @@ namespace Tests
         [Test]
         public void Solution1Test()
         {
-            var p = new P02(ExampleData);
+            var p = new Puzzle(ExampleData);
             p.Solution1().Should().Be(2);
         }
 
@@ -26,13 +26,13 @@ namespace Tests
         [TestCase(2, 9, 'c', "ccccccccc", true)]
         public void Rule1Tests(int p1, int p2, char letter, string pass, bool expected)
         {
-            P02.Rule1((p1, p2, letter, pass)).Should().Be(expected);
+            Puzzle.Rule1((p1, p2, letter, pass)).Should().Be(expected);
         }
 
         [Test]
         public void Solution2Test()
         {
-            var p = new P02(ExampleData);
+            var p = new Puzzle(ExampleData);
             p.Solution2().Should().Be(1);
         }
 
@@ -41,7 +41,7 @@ namespace Tests
         [TestCase(2, 9, 'c', "ccccccccc", false)]
         public void Rule2Tests(int p1, int p2, char letter, string pass, bool expected)
         {
-            P02.Rule2((p1, p2, letter, pass)).Should().Be(expected);
+            Puzzle.Rule2((p1, p2, letter, pass)).Should().Be(expected);
         }
     }
 }

@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace AOC2020.Puzzle01
+namespace AOC2020.Day01
 {
-    public class P01 : PuzzleBase<int, int>
+    public class Puzzle : PuzzleBase<int, int>
     {
-        public P01(IEnumerable<int> input)
+        public Puzzle(IEnumerable<int> input)
         {
             _input = input.ToHashSet();
         }

@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace AOC2020.Puzzle03
+namespace AOC2020.Day03
 {
-    public class P03 : PuzzleBase<int, long>
+    public class Puzzle : PuzzleBase<int, long>
     {
-        public P03(IEnumerable<string> input)
+        public Puzzle(IEnumerable<string> input)
         {
             _input = input.ToArray();
             _width = _input[0].Length;

@@ -1,11 +1,11 @@
 ﻿using NUnit.Framework;
 using FluentAssertions;
-using AOC2020.Puzzle01;
+using AOC2020.Day01;
 
 namespace Tests
 {
     [TestFixture]
-    public class Puzzle01Tests
+    public class Day01Tests
     {
         private static readonly int[] ExampleReport =
         {
@@ -20,14 +20,14 @@ namespace Tests
         [Test]
         public void Solution1Test()
         {
-            var p = new P01(ExampleReport);
+            var p = new Puzzle(ExampleReport);
             p.Solution1().Should().Be(514579);
         }
 
         [Test]
         public void Solution2Test()
         {
-            var p = new P01(ExampleReport);
+            var p = new Puzzle(ExampleReport);
             p.Solution2().Should().Be(241861950);
         }
     }

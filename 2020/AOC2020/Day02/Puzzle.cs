@@ -3,11 +3,11 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Line = System.ValueTuple<int, int, char, string>;
 
-namespace AOC2020.Puzzle02
+namespace AOC2020.Day02
 {
-    public class P02 : PuzzleBase<int, int>
+    public class Puzzle : PuzzleBase<int, int>
     {
-        public P02(IEnumerable<string> input)
+        public Puzzle(IEnumerable<string> input)
         {
             _input = input.Select(SplitLine).ToArray();
         }

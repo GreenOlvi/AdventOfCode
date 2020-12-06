@@ -1,11 +1,11 @@
 ﻿using NUnit.Framework;
 using FluentAssertions;
-using AOC2020.Puzzle03;
+using AOC2020.Day03;
 
 namespace Tests
 {
     [TestFixture]
-    public class Puzzle03Tests
+    public class Day03Tests
     {
         private static readonly string[] ExampleData =
         {
@@ -22,7 +22,7 @@ namespace Tests
             ".#..#...#.#",
         };
 
-        private readonly P03 _example = new P03(ExampleData);
+        private readonly Puzzle _example = new Puzzle(ExampleData);
 
         [Test]
         public void Solution1Test()
