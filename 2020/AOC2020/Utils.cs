@@ -57,5 +57,10 @@ namespace AOC2020
                 yield return current.ToArray();
             }
         }
+
+        public static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(this IEnumerable<(TKey, TValue)> pairs)
+            where TKey : notnull
+            where TValue : notnull
+                => pairs.ToDictionary(p => p.Item1, p => p.Item2);
     }
 }
