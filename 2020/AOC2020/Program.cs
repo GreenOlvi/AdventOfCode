@@ -20,6 +20,7 @@ namespace AOC2020
             { 5, i => new Day05.Puzzle(File.ReadAllLines(i)) },
             { 6, i => new Day06.Puzzle(File.ReadAllLines(i)) },
             { 7, i => new Day07.Puzzle(File.ReadAllLines(i)) },
+            { 8, i => new Day08.Puzzle(File.ReadAllLines(i)) },
         };
 
         private static readonly TimeSpan ProgressTimerDelay = TimeSpan.FromSeconds(10);
@@ -41,13 +42,15 @@ namespace AOC2020
             Console.WriteLine($"Running day {day:00}, input {file}");
             Console.WriteLine();
 
-            var puzzle = _puzzles[day](file);
-            var stopwatch = new Stopwatch();
+            var stopwatch = Stopwatch.StartNew();
+            IPuzzle puzzle = _puzzles[day](file);
+            stopwatch.Stop();
+            Console.WriteLine($"Initialization took {stopwatch.Elapsed}");
 
             using (var timer = SetTimer(() => puzzle.GetProgress1()))
             {
                 Console.WriteLine($"Solving part 1...");
-                stopwatch.Start();
+                stopwatch.Restart();
                 var result1 = await puzzle.Solve1();
                 stopwatch.Stop();
                 timer.Stop();
