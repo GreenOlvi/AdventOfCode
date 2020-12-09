@@ -7,12 +7,10 @@ namespace AOC2020
     public static class Utils
     {
         public static IEnumerable<int> ParseInts(this IEnumerable<string> lines)
-        {
-            foreach (var line in lines)
-            {
-                yield return int.Parse(line);
-            }
-        }
+            => lines.Select(int.Parse);
+
+        public static IEnumerable<long> ParseLongs(this IEnumerable<string> lines)
+            => lines.Select(long.Parse);
 
         public static IEnumerable<string[]> SplitGroups(this IEnumerable<string> input)
         {
