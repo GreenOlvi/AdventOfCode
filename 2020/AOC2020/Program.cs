@@ -13,15 +13,16 @@ namespace AOC2020
 
         private static readonly Dictionary<int, Func<string, IPuzzle>> _puzzles = new Dictionary<int, Func<string, IPuzzle>>
         {
-            { 1, i => new Day01.Puzzle(File.ReadAllLines(i).ParseInts()) },
-            { 2, i => new Day02.Puzzle(File.ReadAllLines(i)) },
-            { 3, i => new Day03.Puzzle(File.ReadAllLines(i)) },
-            { 4, i => new Day04.Puzzle(File.ReadAllLines(i)) },
-            { 5, i => new Day05.Puzzle(File.ReadAllLines(i)) },
-            { 6, i => new Day06.Puzzle(File.ReadAllLines(i)) },
-            { 7, i => new Day07.Puzzle(File.ReadAllLines(i)) },
-            { 8, i => new Day08.Puzzle(File.ReadAllLines(i)) },
-            { 9, i => new Day09.Puzzle(File.ReadAllLines(i).ParseLongs()) },
+            {  1, i => new Day01.Puzzle(File.ReadAllLines(i).ParseInts()) },
+            {  2, i => new Day02.Puzzle(File.ReadAllLines(i)) },
+            {  3, i => new Day03.Puzzle(File.ReadAllLines(i)) },
+            {  4, i => new Day04.Puzzle(File.ReadAllLines(i)) },
+            {  5, i => new Day05.Puzzle(File.ReadAllLines(i)) },
+            {  6, i => new Day06.Puzzle(File.ReadAllLines(i)) },
+            {  7, i => new Day07.Puzzle(File.ReadAllLines(i)) },
+            {  8, i => new Day08.Puzzle(File.ReadAllLines(i)) },
+            {  9, i => new Day09.Puzzle(File.ReadAllLines(i).ParseLongs()) },
+            { 10, i => new Day10.Puzzle(File.ReadAllLines(i).ParseInts()) },
         };
 
         private static readonly TimeSpan ProgressTimerDelay = TimeSpan.FromSeconds(10);
