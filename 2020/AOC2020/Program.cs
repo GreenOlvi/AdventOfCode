@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
 
@@ -25,6 +26,7 @@ namespace AOC2020
             { 10, i => new Day10.Puzzle(File.ReadAllLines(i).ParseInts()) },
             { 11, i => new Day11.Puzzle(File.ReadAllLines(i)) },
             { 12, i => new Day12.Puzzle(File.ReadAllLines(i)) },
+            { 13, i => new Day13.Puzzle(File.ReadLines(i).Take(2)) },
         };
 
         private static readonly TimeSpan ProgressTimerDelay = TimeSpan.FromSeconds(10);

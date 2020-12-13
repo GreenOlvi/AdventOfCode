@@ -60,5 +60,16 @@ namespace AOC2020
             where TKey : notnull
             where TValue : notnull
                 => pairs.ToDictionary(p => p.Item1, p => p.Item2);
+
+        public static int Modulo(int a, int n) => (int)Modulo((long)a, n);
+
+        public static long Modulo(long a, long n)
+        {
+            while (a < 0)
+            {
+                a += n;
+            }
+            return a % n;
+        }
     }
 }
