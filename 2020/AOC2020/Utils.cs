@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace AOC2020
 {
@@ -70,6 +71,12 @@ namespace AOC2020
                 a += n;
             }
             return a % n;
+        }
+
+        public static bool TryMatch(this Regex regex, string input, out Match match)
+        {
+            match = regex.Match(input);
+            return match.Success;
         }
     }
 }
