@@ -62,9 +62,9 @@ namespace AOC2020
             where TValue : notnull
                 => pairs.ToDictionary(p => p.Item1, p => p.Item2);
 
-        public static int Modulo(int a, int n) => (int)Modulo((long)a, n);
+        public static int Modulo(this int a, int n) => (int)Modulo((long)a, n);
 
-        public static long Modulo(long a, long n)
+        public static long Modulo(this long a, long n)
         {
             while (a < 0)
             {
@@ -78,5 +78,8 @@ namespace AOC2020
             match = regex.Match(input);
             return match.Success;
         }
+
+        public static long Product(this IEnumerable<int> numbers) =>
+            numbers.Aggregate(1L, (a, b) => a * b);
     }
 }

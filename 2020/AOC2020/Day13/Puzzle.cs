@@ -43,7 +43,7 @@ namespace AOC2020.Day13
             var b = a % n;
             for (var x = 1; x < n; x++)
             {
-                if (Utils.Modulo(b * x, n) == 1)
+                if ((b * x).Modulo(n) == 1)
                 {
                     return x;
                 }
@@ -54,7 +54,7 @@ namespace AOC2020.Day13
         public override long Solution2()
         {
             (int a, int n)[] aMod = _idsOffset
-                .Select(p => (Utils.Modulo(0 - p.Offset, p.Id), p.Id))
+                .Select(p => ((0 - p.Offset).Modulo(p.Id), p.Id))
                 .ToArray();
 
             var N = aMod.Aggregate(1L, (s, p) => s * p.n);
@@ -71,7 +71,7 @@ namespace AOC2020.Day13
                 var b = N / n;
                 result += a * b * InvMod(b, n);
             }
-            result = Utils.Modulo(result, N);
+            result = result.Modulo(N);
 
             return result;
         }

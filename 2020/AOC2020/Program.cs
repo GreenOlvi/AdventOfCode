@@ -29,6 +29,7 @@ namespace AOC2020
             { 13, i => new Day13.Puzzle(File.ReadLines(i).Take(2)) },
             { 14, i => new Day14.Puzzle(File.ReadLines(i)) },
             { 15, i => new Day15.Puzzle(File.ReadLines(i).First().Split(",").ParseInts()) },
+            { 16, i => new Day16.Puzzle(File.ReadLines(i)) },
         };
 
         private static readonly TimeSpan ProgressTimerDelay = TimeSpan.FromSeconds(10);
