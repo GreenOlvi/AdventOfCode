@@ -9,6 +9,11 @@
 
         public string Text { get; }
 
+        public override MatchResult Match(string text) =>
+            text.StartsWith(Text)
+                ? Matched(text[Text.Length..])
+                : (MatchResult)NotMatched;
+
         public override string ToRegex() => Text;
     }
 }

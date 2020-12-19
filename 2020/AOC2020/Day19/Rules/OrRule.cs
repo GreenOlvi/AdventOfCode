@@ -1,16 +1,37 @@
-﻿namespace AOC2020.Day19
+﻿using System.Collections.Generic;
+using System.Linq;
+
+namespace AOC2020.Day19
 {
     public class OrRule : Rule
     {
-        public OrRule(Rule left, Rule right) : base($"( {left} | {right} )")
+        public OrRule(IEnumerable<Rule> rules)
+            : this(rules.ToArray())
         {
-            Left = left;
-            Right = right;
         }
 
-        public Rule Left { get; }
-        public Rule Right { get; }
+        public OrRule(params Rule[] rules)
+            : base($"( {string.Join(" | ", rules.Select(r => r.ToString()))} )")
+        {
+            _rules = rules;
+        }
 
-        public override string ToRegex() => $"({Left.ToRegex()}|{Right.ToRegex()})";
+        private readonly Rule[] _rules;
+
+        public override MatchResult Match(string text)
+        {
+            var matches = _rules.Select(r => r.Match(text))
+                .Where(m => m is Matched)
+                .Cast<Matched>()
+                .ToArray();
+
+            if (!matches.Any())
+            {
+                return NotMatched;
+            }
+            return Matched(matches.SelectMany(m => m.Rests));
+        }
+
+        public override string ToRegex() => $"({string.Join("|", _rules.Select(r => r.ToRegex()))})";
     }
 }

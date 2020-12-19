@@ -15,40 +15,47 @@ namespace AOC2020.Day19
         private readonly Dictionary<int, string> _unparsedRules;
         private readonly Dictionary<int, Rule> _parsedRules = new Dictionary<int, Rule>();
 
-        public Rule GetRule(int id)
+        public Rule GetRule(int id) => GetRule(id, Enumerable.Empty<int>());
+
+        private Rule GetRule(int id, IEnumerable<int> currentlyParsing)
         {
             if (!_parsedRules.ContainsKey(id))
             {
-                _parsedRules[id] = ParseRule(_unparsedRules[id]);
+                _parsedRules[id] = ParseRule(_unparsedRules[id], currentlyParsing.Append(id));
             }
             return _parsedRules[id];
         }
 
         private static readonly Regex _concatRuleRegex = new Regex(@"\d+\s\d+", RegexOptions.Compiled);
-        private static readonly Regex _letterRuleRegex = new Regex(@"""(?<char>\w)""", RegexOptions.Compiled);
+        private static readonly Regex _letterRuleRegex = new Regex(@"""(?<text>\w+)""", RegexOptions.Compiled);
 
-        private Rule ParseRule(string unparsed)
+        private Rule ParseRule(string unparsed, IEnumerable<int> currentlyParsing)
         {
-            Console.WriteLine($"Parsing rule [{unparsed}]...");
-
             if (int.TryParse(unparsed, out var id))
             {
-                return GetRule(id);
+                if (currentlyParsing.Contains(id))
+                {
+                    return new RuleLink(id, () => GetRule(id));
+                }
+                else
+                {
+                    return GetRule(id);
+                }
             }
 
             if (unparsed.Contains("|"))
             {
-                var parts = unparsed.Split("|", StringSplitOptions.TrimEntries);
-                var left = ParseRule(parts[0]);
-                var right = ParseRule(parts[1]);
-                return new OrRule(left, right);
+                var rules = unparsed.Split("|", StringSplitOptions.TrimEntries)
+                    .Select(s => ParseRule(s, currentlyParsing))
+                    .ToArray();
+
+                return new OrRule(rules);
             }
 
             if (_concatRuleRegex.IsMatch(unparsed))
             {
                 var rules = unparsed.Split(" ", StringSplitOptions.TrimEntries)
-                    .ParseInts()
-                    .Select(GetRule)
+                    .Select(s => ParseRule(s, currentlyParsing))
                     .ToArray();
 
                 if (rules.All(r => r is TextRule))
@@ -62,8 +69,7 @@ namespace AOC2020.Day19
 
             if (_letterRuleRegex.TryMatch(unparsed, out var match))
             {
-                var l = match.Groups["char"].Value;
-                return new TextRule(l);
+                return new TextRule(match.Groups["text"].Value);
             }
 
             throw new PuzzleException($"Invalid rule: [{unparsed}]");
@@ -71,5 +77,9 @@ namespace AOC2020.Day19
 
         public Regex BuildRegex(int startingRule = 0) =>
             new Regex("^" + GetRule(startingRule).ToRegex() + "$", RegexOptions.Compiled);
+
+        public bool IsMatch(string text, int rule = 0) =>
+            GetRule(rule).Match(text) is Matched m && m.Rests.Any(r => r == string.Empty);
+
     }
 }
