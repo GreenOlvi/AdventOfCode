@@ -24,6 +24,18 @@ namespace Tests
             "10",
         };
 
+        private static readonly string[] InfiniteLoopExample =
+        {
+            "Player 1:",
+            "43",
+            "19",
+            "",
+            "Player 2:",
+            "2",
+            "29",
+            "14",
+        };
+
         private readonly Puzzle _example = new Puzzle(ExampleData);
 
         [Test]
@@ -33,10 +45,15 @@ namespace Tests
         }
 
         [Test]
-        [Ignore("Not solved yet")]
         public void Solution2Test()
         {
             _example.Solution2().Should().Be(291);
+        }
+
+        [Test]
+        public void InfiniteLoopAvoidintTest()
+        {
+            new Puzzle(InfiniteLoopExample).Solution2().Should().Be(105);
         }
     }
 }
