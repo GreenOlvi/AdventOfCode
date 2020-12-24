@@ -15,5 +15,7 @@
         public static Point operator *(Point a, int b) => new Point(a.X * b, a.Y * b);
 
         public override string ToString() => $"({X},{Y})";
+
+        public static readonly Point Zero = new Point(0, 0);
     }
 }

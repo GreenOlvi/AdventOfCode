@@ -53,34 +53,36 @@ namespace AOC2020.Day24
             { Direction.NE, new Point(1, -1) },
         };
 
-        private static Point Move(Point p, Direction d) => p + DirectionOffset[d];
-
         private static Point Move(Point p, IEnumerable<Direction> path) =>
-            path.Aggregate(p, (p, d) => Move(p, d));
+            path.Aggregate(p, (p, d) => p + DirectionOffset[d]);
 
-        public override int Solution1()
-        {
-            var start = new Point(0, 0);
-            var black = new HashSet<Point>();
-            foreach (var path in _input)
-            {
-                var dest = Move(start, path);
-                if (black.Contains(dest))
-                {
-                    black.Remove(dest);
-                }
-                else
-                {
-                    black.Add(dest);
-                }
-            }
+        private static IEnumerable<Point> GetNeighbours(Point p) =>
+            DirectionOffset.Values.Select(o => p + o);
 
-            return black.Count;
-        }
+        private static HashSet<Point> Transform(HashSet<Point> board) =>
+            board.SelectMany(p => GetNeighbours(p))
+                .GroupBy(p => p)
+                .Select(g => (g.Key, g.Count()))
+                .Where(n => (board.Contains(n.Key) && (n.Item2 == 1 || n.Item2 == 2)) || (!board.Contains(n.Key) && n.Item2 == 2))
+                .Select(n => n.Key)
+                .ToHashSet();
+
+        private static IEnumerable<Point> LoadBoard(IEnumerable<IEnumerable<Direction>> directions) =>
+            directions.Select(d => Move(Point.Zero, d))
+                .GroupBy(p => p)
+                .Where(p => p.Count() % 2 == 1)
+                .Select(p => p.Key);
+
+        public override int Solution1() => LoadBoard(_input).Count();
 
         public override int Solution2()
         {
-            return 0;
+            var init = LoadBoard(_input).ToHashSet();
+
+            var board = Enumerable.Range(0, 100)
+                .Aggregate(init, (b, i) => Transform(b));
+
+            return board.Count;
         }
     }
 }

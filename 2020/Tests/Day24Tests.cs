@@ -1,7 +1,6 @@
 ﻿using NUnit.Framework;
 using FluentAssertions;
 using AOC2020.Day24;
-using static AOC2020.Day24.Puzzle;
 
 namespace Tests
 {
@@ -43,19 +42,18 @@ namespace Tests
         [Test]
         public void ParseLineTest()
         {
-            ParseLine("nwwswee").Should().BeEquivalentTo(
-                Direction.NW,
-                Direction.W,
-                Direction.SW,
-                Direction.E,
-                Direction.E);
+            Puzzle.ParseLine("nwwswee").Should().BeEquivalentTo(
+                Puzzle.Direction.NW,
+                Puzzle.Direction.W,
+                Puzzle.Direction.SW,
+                Puzzle.Direction.E,
+                Puzzle.Direction.E);
         }
 
         [Test]
-        [Ignore("Not solved yet")]
         public void Solution2Test()
         {
-            _example.Solution2().Should().Be(-1);
+            _example.Solution2().Should().Be(2208);
         }
     }
 }
