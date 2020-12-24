@@ -2,7 +2,7 @@
   "profiles": {
     "AOC2020": {
       "commandName": "Project",
-      "commandLineArgs": "24"
+      "commandLineArgs": "21"
     }
   }
 }
