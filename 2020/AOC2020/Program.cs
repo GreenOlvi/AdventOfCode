@@ -36,6 +36,7 @@ namespace AOC2020
             { 20, i => new Day20.Puzzle(File.ReadLines(i)) },
             { 21, i => new Day21.Puzzle(File.ReadLines(i)) },
             { 22, i => new Day22.Puzzle(File.ReadLines(i)) },
+            { 23, i => new Day23.Puzzle(File.ReadLines(i).First()) },
             { 24, i => new Day24.Puzzle(File.ReadLines(i)) },
             { 25, i => new Day25.Puzzle(File.ReadLines(i).ParseLongs()) },
         };
