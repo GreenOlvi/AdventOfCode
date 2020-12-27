@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace AOC2020.Day23
 {
@@ -15,69 +16,103 @@ namespace AOC2020.Day23
 
         private readonly int[] _input;
 
-        public int Moves { get; set; } = 100;
+        private const int Moves = 100;
+        private const long ExtendedMoves = 10_000_000;
 
-        private static List<int> PickUp(List<int> list, int current, out int[] picked)
+        private static IEnumerable<int> ExtendedInput(int[] input)
         {
-            picked = list.Skip(current + 1).Take(3).ToArray();
-            list.RemoveRange(current + 1, 3);
-            return list;
-        }
-
-        private static int PickDestination(List<int> list, int current)
-        {
-            var curr = list[current] - 1;
-            while (curr >= list.Min())
+            foreach (var i in input)
             {
-                if (list.Contains(curr))
-                {
-                    return list.IndexOf(curr);
-                }
-                curr--;
+                yield return i;
             }
-            return list.IndexOf(list.Max());
+
+            for (int i = input.Length + 1; i <= 1_000_000; i++)
+            {
+                yield return i;
+            }
         }
 
-        private static List<int> InsertAfter(List<int> list, int destination, int[] elements)
+        private static int PickDestination(int[] s, int current, int p)
         {
-            list.InsertRange(destination + 1, elements);
-            return list;
+            var dest = current - 1;
+            while (dest == 0 || p == dest || s[p] == dest || s[s[p]] == dest)
+            {
+                dest--;
+                if (dest <= 0)
+                {
+                    dest = s.Length - 1;
+                }
+            }
+            return dest;
         }
 
-        private static List<int> ReindexList(List<int> list, int newStart)
+        private static int[] PlayFaster(IEnumerable<int> input, long moves)
         {
-            var wrapped = list.Take(newStart).ToArray();
-            list.RemoveRange(0, newStart);
-            list.AddRange(wrapped);
-            return list;
+            var s = BuildSuccessorList(input);
+            var current = input.First();
+
+            for (var i = 0L; i < moves; i++)
+            {
+                var p1 = s[current];        // first picked
+                var p3 = s[s[s[current]]];  // last picked
+
+                s[current] = s[p3];         // snip
+
+                var destination = PickDestination(s, current, p1);
+
+                s[p3] = s[destination];     // paste
+                s[destination] = p1;
+
+                current = s[current];
+            }
+
+            return s;
         }
 
-        private static string PrintResult(List<int> list)
+        public static int[] BuildSuccessorList(IEnumerable<int> input)
         {
-            var copy = new List<int>(list);
-            ReindexList(copy, copy.IndexOf(1));
-            return string.Join("", copy.Skip(1));
+            var tmp = input.ToArray();
+            var s = new int[tmp.Length + 1];
+
+            s[0] = -1;
+            for (var i = 0; i < tmp.Length - 1; i++)
+            {
+                s[tmp[i]] = tmp[i + 1];
+            }
+            s[tmp[^1]] = tmp[0];
+
+            return s;
+        }
+
+        private static string PrintSuccessorList(int[] list, int start = 1, int count = 10, string? separator = default)
+        {
+            var sb = new StringBuilder();
+            var curr = start;
+
+            for (var i = 0; i < count - 1; i++)
+            {
+                sb.Append(curr);
+                if (separator != null)
+                {
+                    sb.Append(separator);
+                }
+                curr = list[curr];
+            }
+            sb.Append(curr);
+
+            return sb.ToString();
         }
 
         public override string Solution1()
         {
-            var list = new List<int>(_input);
-            var currentIndex = 0;
-
-            for (var i = 0; i < Moves; i++)
-            {
-                list = PickUp(list, currentIndex, out var picked);
-                var destination = PickDestination(list, currentIndex);
-                list = InsertAfter(list, destination, picked);
-                list = ReindexList(list, 1);
-            }
-
-            return PrintResult(list);
+            var list = PlayFaster(_input, Moves);
+            return PrintSuccessorList(list, list[1], 8);
         }
 
         public override long Solution2()
         {
-            return 0;
+            var list = PlayFaster(ExtendedInput(_input), ExtendedMoves);
+            return list[1] * (long)list[list[1]];
         }
     }
 }

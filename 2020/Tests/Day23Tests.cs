@@ -18,10 +18,16 @@ namespace Tests
         }
 
         [Test]
-        [Ignore("Not solved yet")]
         public void Solution2Test()
         {
-            _example.Solution2().Should().Be(-1);
+            _example.Solution2().Should().Be(149245887792);
+        }
+        
+        [Test]
+        public void BuildSuccessorListTest()
+        {
+            Puzzle.BuildSuccessorList(new[] { 3, 8, 9, 1, 2, 5, 4, 6, 7 })
+                .Should().BeEquivalentTo(-1, 2, 5, 8, 6, 4, 7, 3, 9, 1);
         }
     }
 }
