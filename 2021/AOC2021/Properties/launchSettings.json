@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "AOC2021 Day 01": {
+      "commandName": "Project",
+      "commandLineArgs": "1"
+    }
+  }
+}
