@@ -1,16 +1,11 @@
 ﻿using System.Diagnostics;
+using System.Reflection;
 
 namespace AOC2021
 {
     internal static class Program
     {
         private const string InputPath = "input";
-
-        private static readonly Dictionary<int, Func<string, IPuzzle>> _puzzles = new()
-        {
-            { 1, i => new Day01.Puzzle(ReadLines(i)) },
-            { 2, i => new Day02.Puzzle(ReadLines(i)) }
-        };
 
         internal static async Task<int> Main(string[] args)
         {
@@ -20,7 +15,7 @@ namespace AOC2021
             }
 
             var (day, file) = input;
-            if (!_puzzles.ContainsKey(day))
+            if (!TryGetPuzzleFactory(day, out var factory))
             {
                 Console.WriteLine($"No day {day:00} puzzle solution defined");
                 return -1;
@@ -30,33 +25,42 @@ namespace AOC2021
             Console.WriteLine();
 
             var stopwatch = Stopwatch.StartNew();
-            IPuzzle puzzle = _puzzles[day](file);
+            var puzzle = factory(ReadLines(file));
             stopwatch.Stop();
             Console.WriteLine($"Initialization took {stopwatch.Elapsed}");
 
-            await Run(puzzle, 1);
-            await Run(puzzle, 2);
+            await Run(puzzle, 1, puzzle.Solve1);
+            await Run(puzzle, 2, puzzle.Solve2);
 
             return 0;
         }
 
-        private static async Task<bool> Run(IPuzzle puzzle, int part)
+        private static async Task<bool> Run(IPuzzle puzzle, int part, Func<string> method)
         {
-            Func<string> method = part switch
-            {
-                1 => puzzle.Solve1,
-                2 => puzzle.Solve2,
-                _ => throw new InvalidOperationException(),
-            };
-
             Console.WriteLine($"Solving part {part}...");
+
             var stopwatch = Stopwatch.StartNew();
             var result = await Task.Run(method);
             stopwatch.Stop();
+
             Console.WriteLine();
             Console.WriteLine($"Result {part} = {result}");
             Console.WriteLine($"Took {stopwatch.Elapsed}");
+
             return result != null;
+        }
+
+        private static bool TryGetPuzzleFactory(int day, out Func<IEnumerable<string>, IPuzzle> factory)
+        {
+            var puzzleType = Assembly.GetExecutingAssembly().GetType($"AOC2021.Day{day:00}.Puzzle");
+            if (puzzleType is null)
+            {
+                factory = default;
+                return false;
+            }
+
+            factory = lines => (IPuzzle)Activator.CreateInstance(puzzleType, lines);
+            return true;
         }
 
         private static bool TryParseArgs(string[] args, out (int Day, string Path) inputArgs)

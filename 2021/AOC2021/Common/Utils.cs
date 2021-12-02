@@ -70,23 +70,6 @@ namespace AOC2021.Common
             return a % n;
         }
 
-        public static bool TryMatch(this Regex regex, string input, out Match match)
-        {
-            match = regex.Match(input);
-            return match.Success;
-        }
-
-        public static bool TryMatch(this Regex regex, string input, string group, out string value)
-        {
-            if (regex.TryMatch(input, out var match))
-            {
-                value = match.Groups[group].Value;
-                return true;
-            }
-            value = null;
-            return false;
-        }
-
         public static long Product(this IEnumerable<int> numbers) => numbers.Aggregate(1L, (a, b) => a * b);
 
         public static IEnumerable<IEnumerable<T>> SlidingWindow<T>(this IEnumerable<T> input, int n)

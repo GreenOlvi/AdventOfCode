@@ -1,6 +1,5 @@
 ﻿using System.Text.RegularExpressions;
 using AOC2021.Common;
-using static AOC2021.Common.Utils;
 
 namespace AOC2021.Day00
 {

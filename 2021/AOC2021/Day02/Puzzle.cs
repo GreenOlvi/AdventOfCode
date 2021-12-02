@@ -1,6 +1,5 @@
 ﻿using System.Text.RegularExpressions;
 using AOC2021.Common;
-using static AOC2021.Common.Utils;
 
 namespace AOC2021.Day02
 {
@@ -22,17 +21,8 @@ namespace AOC2021.Day02
 
         private readonly (Direction, int)[] _directions;
 
-        private (Direction, int) ParseDirection(string line)
-        {
-            if (!dirRegex.TryMatch(line, out var match))
-            {
-                throw new InvalidDataException();
-            }
-
-            var d = (Direction)Enum.Parse(typeof(Direction), match.Groups["dir"].Value);
-            var v = int.Parse(match.Groups["value"].Value);
-            return (d, v);
-        }
+        private (Direction, int) ParseDirection(string line) =>
+            dirRegex.Parse(line, ("dir", Enum.Parse<Direction>), ("value", int.Parse));
 
         private static Point Move1(Point current, (Direction Direction, int Value) dir) =>
             dir.Direction switch
