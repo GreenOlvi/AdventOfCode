@@ -21,7 +21,7 @@
 
   <ItemGroup>
     <Content Include="favicon.ico" />
-    <Content Include="input\01.txt">
+    <Content Include="input/*.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

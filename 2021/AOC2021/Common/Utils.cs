@@ -5,7 +5,7 @@ namespace AOC2021.Common
     public static class Utils
     {
         public static IEnumerable<int> ParseInts(this IEnumerable<string> lines)
-    => lines.Select(int.Parse);
+            => lines.Select(int.Parse);
 
         public static IEnumerable<long> ParseLongs(this IEnumerable<string> lines)
             => lines.Select(long.Parse);

@@ -19,4 +19,9 @@
     <ProjectReference Include="..\AOC2021\AOC2021.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="Day00Tests.cs" />
+    <None Include="Day00Tests.cs" />
+  </ItemGroup>
+
 </Project>

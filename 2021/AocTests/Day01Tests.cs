@@ -4,7 +4,7 @@ using FluentAssertions;
 
 namespace AocTests
 {
-    public class Puzzle01Tests
+    public class Day01Tests
     {
         private static readonly string[] _testInput = new[]
         {

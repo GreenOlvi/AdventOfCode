@@ -8,7 +8,8 @@ namespace AOC2021
 
         private static readonly Dictionary<int, Func<string, IPuzzle>> _puzzles = new()
         {
-            { 1, i => new Day01.Puzzle(ReadLines(i)) }
+            { 1, i => new Day01.Puzzle(ReadLines(i)) },
+            { 2, i => new Day02.Puzzle(ReadLines(i)) }
         };
 
         internal static async Task<int> Main(string[] args)
