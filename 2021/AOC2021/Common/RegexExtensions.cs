@@ -110,24 +110,24 @@ namespace AOC2021.Common
         }
 
         public static T Parse<T>(this Regex regex, string input, string group, Func<string, T> converter) =>
-            !regex.TryParse(input, group, converter, out T value) ? value : throw new InvalidOperationException();
+            regex.TryParse(input, group, converter, out T value) ? value : throw new InvalidOperationException();
 
         public static (T1, T2) Parse<T1, T2>(this Regex regex, string input,
             (string Name, Func<string, T1> F) val1,
             (string Name, Func<string, T2> F) val2) =>
-            !regex.TryParseMany(input, val1, val2,  out (T1, T2) value) ? value : throw new InvalidOperationException();
+            regex.TryParseMany(input, val1, val2,  out (T1, T2) value) ? value : throw new InvalidOperationException();
 
         public static (T1, T2, T3) Parse<T1, T2, T3>(this Regex regex, string input,
             (string Name, Func<string, T1> F) val1,
             (string Name, Func<string, T2> F) val2,
             (string Name, Func<string, T3> F) val3) =>
-            !regex.TryParseMany(input, val1, val2, val3, out (T1, T2, T3) value) ? value : throw new InvalidOperationException();
+            regex.TryParseMany(input, val1, val2, val3, out (T1, T2, T3) value) ? value : throw new InvalidOperationException();
 
         public static (T1, T2, T3, T4) Parse<T1, T2, T3, T4>(this Regex regex, string input,
             (string Name, Func<string, T1> F) val1,
             (string Name, Func<string, T2> F) val2,
             (string Name, Func<string, T3> F) val3,
             (string Name, Func<string, T4> F) val4) =>
-            !regex.TryParseMany(input, val1, val2, val3, val4, out (T1, T2, T3, T4) value) ? value : throw new InvalidOperationException();
+            regex.TryParseMany(input, val1, val2, val3, val4, out (T1, T2, T3, T4) value) ? value : throw new InvalidOperationException();
     }
 }

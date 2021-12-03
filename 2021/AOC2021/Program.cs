@@ -29,25 +29,41 @@ namespace AOC2021
             stopwatch.Stop();
             Console.WriteLine($"Initialization took {stopwatch.Elapsed}");
 
-            await Run(puzzle, 1, puzzle.Solve1);
-            await Run(puzzle, 2, puzzle.Solve2);
+            await Run(1, puzzle.Solve1);
+            await Run(2, puzzle.Solve2);
 
             return 0;
         }
 
-        private static async Task<bool> Run(IPuzzle puzzle, int part, Func<string> method)
+        private static async Task<bool> Run(int part, Func<string> method)
         {
-            Console.WriteLine($"Solving part {part}...");
-
-            var stopwatch = Stopwatch.StartNew();
-            var result = await Task.Run(method);
-            stopwatch.Stop();
-
             Console.WriteLine();
-            Console.WriteLine($"Result {part} = {result}");
-            Console.WriteLine($"Took {stopwatch.Elapsed}");
+            Console.WriteLine($"Solving part {part}...");
+            Console.WriteLine();
 
-            return result != null;
+            try
+            {
+                var stopwatch = Stopwatch.StartNew();
+                var result = await Task.Run(method);
+                stopwatch.Stop();
+
+                Console.Write($"Result {part} = ");
+
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine(result);
+                Console.ResetColor();
+
+                Console.WriteLine($"Took {stopwatch.Elapsed}");
+
+                return result != null;
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"Failed: {ex.Message}");
+                Console.ResetColor();
+            }
+            return false;
         }
 
         private static bool TryGetPuzzleFactory(int day, out Func<IEnumerable<string>, IPuzzle> factory)
