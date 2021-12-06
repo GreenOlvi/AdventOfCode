@@ -1,5 +1,4 @@
-﻿using System.Text.RegularExpressions;
-using AOC2021.Common;
+﻿using AOC2021.Common;
 
 namespace AOC2021.Day06
 {
@@ -14,10 +13,6 @@ namespace AOC2021.Day06
         }
 
         private readonly int[] _initial;
-
-        public override long Solution1() => LoopFishes(80);
-
-        public override long Solution2() => LoopFishes(256);
 
         private long LoopFishes(int days)
         {
@@ -40,5 +35,9 @@ namespace AOC2021.Day06
 
             return fishes.Sum();
         }
+
+        public override long Solution1() => LoopFishes(80);
+
+        public override long Solution2() => LoopFishes(256);
     }
 }
