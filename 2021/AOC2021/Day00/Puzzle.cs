@@ -3,18 +3,18 @@ using AOC2021.Common;
 
 namespace AOC2021.Day00
 {
-    public class Puzzle : PuzzleBase<int, int>
+    public class Puzzle : PuzzleBase<long, long>
     {
         public Puzzle(IEnumerable<string> lines)
         {
         }
 
-        public override int Solution1()
+        public override long Solution1()
         {
             throw new NotImplementedException();
         }
 
-        public override int Solution2()
+        public override long Solution2()
         {
             throw new NotImplementedException();
         }
