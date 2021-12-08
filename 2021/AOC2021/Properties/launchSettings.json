@@ -27,6 +27,10 @@
     "AOC2021 Day 07": {
       "commandName": "Project",
       "commandLineArgs": "7"
+    },
+    "AOC2021 Day 08": {
+      "commandName": "Project",
+      "commandLineArgs": "8"
     }
   }
 }
