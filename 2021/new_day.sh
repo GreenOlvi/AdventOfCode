@@ -6,6 +6,8 @@ printf -v padded "%02d" $1
 mkdir -p "AOC2021/Day$padded"
 cat "AOC2021/Day00/Puzzle.cs" | sed "s/Day00/Day$padded/g" > "AOC2021/Day$padded/Puzzle.cs"
 
+touch "AOC2021/input/$padded.txt"
+
 printf -v testname "Day%sTests.cs" $padded
 cat "AocTests/Day00Tests.cs" | sed "s/Day00/Day$padded/g" > "AocTests/$testname"
 
