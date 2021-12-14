@@ -80,5 +80,27 @@ namespace AOC2021.Common
                 yield return arr.Skip(i).Take(n);
             }
         }
+
+        public static string Print(this IEnumerable<Point> points)
+        {
+            var pointArray = points.ToArray();
+            var minX = points.Min(p => p.X);
+            var minY = points.Min(p => p.Y);
+            var maxX = points.Max(p => p.X);
+            var maxY = points.Max(p => p.Y);
+
+            var r = Enumerable.Range(0, (int)(maxY - minY + 1))
+                .Select(i => Enumerable.Range(0, (int)(maxX - minX + 1)).Select(j => ' ').ToArray())
+                .ToArray();
+
+            foreach (var point in pointArray)
+            {
+                var y = point.Y - minY;
+                var x = (int)(point.X - minX);
+                r[y][x] = '#';
+            }
+
+            return "\n" + string.Join("\n", r.Select(l => new string(l)));
+        }
     }
 }
