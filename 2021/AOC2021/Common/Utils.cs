@@ -81,6 +81,18 @@ namespace AOC2021.Common
             }
         }
 
+        public static void TryUpdate<TKey, TValue>(this Dictionary<TKey, TValue> dict, TKey key, Func<TValue, TValue> update, TValue newValue = default)
+        {
+            if (dict.TryGetValue(key, out var value))
+            {
+                dict[key] = update(value);
+            }
+            else
+            {
+                dict.Add(key, newValue);
+            }
+        }
+
         public static string Print(this IEnumerable<Point> points)
         {
             var pointArray = points.ToArray();

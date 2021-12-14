@@ -50,7 +50,7 @@ namespace AocTests
         [Test]
         public void Solution2Test()
         {
-            _puzzle.Solution2().Should().Be(0);
+            _puzzle.Solution2().Should().Be("\n#####\n#   #\n#   #\n#   #\n#####");
         }
     }
 }
