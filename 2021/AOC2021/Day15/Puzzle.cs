@@ -18,7 +18,7 @@ namespace AOC2021.Day15
         private readonly int _height;
         private readonly int[] _risk;
 
-        private static string PrintMap(Map map)
+        private static string PrintMap(Map map, bool debug = false)
         {
             var path = GetShortestPath(map).ToHashSet();
 
@@ -30,13 +30,27 @@ namespace AOC2021.Day15
                 {
                     var p = new Point(x, y);
                     var d = map.GetData(p);
-                    if (path.Contains(p))
+                    if (debug)
                     {
-                        sb.Append($"[{d.Risk}, {d.GetDir()}, {d.Sum,3}] ");
+                        if (path.Contains(p))
+                        {
+                            sb.Append($"[{d.Risk}, {d.GetDir()}, {d.Sum,3}] ");
+                        }
+                        else
+                        {
+                            sb.Append($" {d.Risk}, {d.GetDir()}, {d.Sum,3}  ");
+                        }
                     }
                     else
                     {
-                        sb.Append($" {d.Risk}, {d.GetDir()}, {d.Sum,3}  ");
+                        if (path.Contains(p))
+                        {
+                            sb.Append($"[{d.Risk}]");
+                        }
+                        else
+                        {
+                            sb.Append($" {d.Risk} ");
+                        }
                     }
                 }
             }
@@ -82,12 +96,12 @@ namespace AOC2021.Day15
         }
 
         private static long FindLowestRisk(Map map) {
-            var end = map.GetEnd();
-            end.Sum = end.Risk;
-            end.Visited = true;
+            var start = map.GetStart();
+            start.Sum = start.Risk;
+            start.Visited = true;
 
-            var todo = new PriorityQueue<Map.PointData>(p => p.Risk);
-            todo.EnqueueRange(map.GetNeighbours(end));
+            var todo = new PriorityQueue<Map.PointData>(p => (int)(p.Pos.X + p.Pos.Y));
+            todo.EnqueueRange(map.GetNeighbours(start));
 
             while (todo.Count > 0)
             {
@@ -98,10 +112,8 @@ namespace AOC2021.Day15
                 }
             }
 
-            //var s = PrintMap(map);
-
-            var start = map.GetStart();
-            return start.Sum - start.Risk;
+            var end = map.GetEnd();
+            return end.Sum - end.Risk;
         }
 
         public override long Solution1()
@@ -112,7 +124,8 @@ namespace AOC2021.Day15
 
         public override long Solution2()
         {
-            throw new NotImplementedException();
+            var map = Map.FromRiskX25(_width, _height, _risk);
+            return FindLowestRisk(map);
         }
 
         private class Map
@@ -132,6 +145,25 @@ namespace AOC2021.Day15
                         Pos = new Point(i % Width, i / Width),
                     })
                     .ToArray();
+            }
+
+            public static Map FromRiskX25(int width, int height, int[] risk)
+            {
+                var map = new int[width * height * 25];
+                for (var y = 0; y < height; y++)
+                {
+                    for (var x = 0; x < width; x++)
+                    {
+                        for (var dy = 0; dy < 5; dy++)
+                        {
+                            for (var dx = 0; dx < 5; dx++)
+                            {
+                                map[(y + dy * height) * width * 5 + (x + dx * width)] = (risk[y * width + x] + dx + dy - 1) % 9 + 1;
+                            }
+                        }
+                    }
+                }
+                return new Map(width * 5, height * 5, map);
             }
 
             public PointData GetData(Point p) => _map[p.Y * Width + p.X];
