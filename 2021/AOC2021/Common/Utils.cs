@@ -71,6 +71,9 @@ namespace AOC2021.Common
         }
 
         public static long Product(this IEnumerable<int> numbers) => numbers.Aggregate(1L, (a, b) => a * b);
+        public static long Product(this IEnumerable<long> numbers) => numbers.Aggregate(1L, (a, b) => a * b);
+        public static long Product<T>(this IEnumerable<T> elements, Func<T, int> selector) => elements.Select(selector).Product();
+        public static long Product<T>(this IEnumerable<T> elements, Func<T, long> selector) => elements.Select(selector).Product();
 
         public static IEnumerable<IEnumerable<T>> SlidingWindow<T>(this IEnumerable<T> input, int n)
         {
