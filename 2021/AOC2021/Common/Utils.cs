@@ -96,6 +96,19 @@ namespace AOC2021.Common
             }
         }
 
+        public static IEnumerable<(T, T)> GetAllPairs<T>(this IEnumerable<T> elements)
+        {
+            var el = elements.ToArray();
+            for (var i = 0; i < el.Length; i++)
+            {
+                for (var j = 0; j < el.Length; j++)
+                {
+                    if (i == j) continue;
+                    yield return (el[i], el[j]);
+                }
+            }
+        }
+
         public static string Print(this IEnumerable<Point> points)
         {
             var pointArray = points.ToArray();
