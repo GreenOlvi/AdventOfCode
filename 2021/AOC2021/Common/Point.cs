@@ -1,9 +1,9 @@
 ﻿namespace AOC2021.Common
 {
-    public record Point
+    public readonly record struct Point
     {
-        public long X;
-        public long Y;
+        public long X { get; init; }
+        public long Y { get; init; }
 
         public Point(long x, long y) => (X, Y) = (x, y);
 
