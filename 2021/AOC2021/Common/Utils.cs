@@ -70,6 +70,8 @@ namespace AOC2021.Common
             return a % n;
         }
 
+        public static byte Modulo(this byte a, byte n) => (byte)(a % n);
+
         public static long Product(this IEnumerable<int> numbers) => numbers.Aggregate(1L, (a, b) => a * b);
         public static long Product(this IEnumerable<long> numbers) => numbers.Aggregate(1L, (a, b) => a * b);
         public static long Product<T>(this IEnumerable<T> elements, Func<T, int> selector) => elements.Select(selector).Product();
