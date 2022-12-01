@@ -115,6 +115,8 @@ public static class Utils
         }
     }
 
+    public static ValueTask<string> ToResult<T>(this T value) => new(value?.ToString() ?? "<null>");
+
     public static string Print(this IEnumerable<Point2> points)
     {
         var pointArray = points.ToArray();

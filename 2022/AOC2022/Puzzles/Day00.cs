@@ -6,6 +6,10 @@ public class Day00 : CustomBaseDay
     {
     }
 
+    public Day00(IEnumerable<string> lines)
+    {
+    }
+
     public override ValueTask<string> Solve_1()
     {
         return ValueTask.FromResult("result1");
