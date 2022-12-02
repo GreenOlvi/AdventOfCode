@@ -10,7 +10,7 @@ url="https://adventofcode.com/2022/day/$d/input"
 echo "Url=$url"
 
 printf -v padded "%02d" $d
-dest="Inputs/$padded.txt"
+dest="AOC2022/Inputs/$padded.txt"
 echo "Destination=$dest"
 
 ua="github.com/GreenOlvi/AdventOfCode/2022/fetch_input.sh by piotr.szulc86@gmail.com"
