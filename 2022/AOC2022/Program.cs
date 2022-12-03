@@ -1,4 +1,5 @@
 ﻿global using AOC2022.Common;
+global using System.Linq;
 
 using AoCHelper;
 using Spectre.Console;

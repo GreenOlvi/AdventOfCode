@@ -1,5 +1,6 @@
 namespace Tests;
 
+[TestFixture]
 public class Day01Tests
 {
     private readonly IEnumerable<string> _testInput = new[]
