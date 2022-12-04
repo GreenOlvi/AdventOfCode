@@ -1,5 +1,7 @@
 ﻿global using AOC2022.Common;
 global using System.Linq;
+global using System.Text.RegularExpressions;
+
 
 using AoCHelper;
 using Spectre.Console;

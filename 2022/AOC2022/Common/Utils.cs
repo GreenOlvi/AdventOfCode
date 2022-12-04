@@ -1,6 +1,4 @@
-﻿using System.Numerics;
-
-namespace AOC2022.Common;
+﻿namespace AOC2022.Common;
 
 public static class Utils
 {
