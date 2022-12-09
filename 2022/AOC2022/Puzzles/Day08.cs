@@ -67,33 +67,4 @@ public class Day08 : CustomBaseDay
 
     public override ValueTask<string> Solve_2() =>
         _grid.EnumeratePoints().Select(p => GetScore(_grid, p)).Max().ToResult();
-
-    public readonly record struct Grid<T>
-    {
-        private readonly T[][] _items;
-
-        public readonly int Width;
-        public readonly int Height;
-
-        public Grid(T[][] items)
-        {
-            _items = items;
-            Width = _items[0].Length;
-            Height = _items.Length;
-        }
-
-        public T this[Point2 p] => _items[p.Y][p.X];
-
-        public T Get(Point2 p) => _items[p.Y][p.X];
-
-        public IEnumerable<Point2> EnumeratePoints()
-        {
-            int w = Width;
-            return Enumerable.Range(0, Height)
-                .SelectMany(y => Enumerable.Range(0, w)
-                    .Select(x => new Point2(x, y)));
-        }
-
-        public bool IsInside(Point2 p) => p.X >= 0 && p.Y >= 0 && p.X < Width && p.Y < Height;
-    }
 }

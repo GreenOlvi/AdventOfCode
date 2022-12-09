@@ -37,4 +37,26 @@ public readonly record struct Point2
     public static readonly Point2 Right = new(1, 0);
     public static readonly Point2 Up = new(0, -1);
     public static readonly Point2 Down = new(0, 1);
+
+    public static IEnumerable<Point2> Rectangle(int width, int height)
+    {
+        for (var x = 0; x < width; x++)
+        {
+            for (var y = 0; y < height; y++)
+            {
+                yield return new Point2(x, y);
+            }
+        }
+    }
+
+    public static IEnumerable<Point2> Rectangle(Point2 start, Point2 end)
+    {
+        for (var x = start.X; x <= end.X; x++)
+        {
+            for (var y = start.Y; y <= end.Y; y++)
+            {
+                yield return new Point2(x, y);
+            }
+        }
+    }
 }
