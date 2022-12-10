@@ -13,10 +13,13 @@ internal partial class Program
     {
         Test1();
         Test2();
+        Test3();
 
         var input = File.ReadAllText(InputFile);
         var boss = ParseInput(input);
         var player = new Player(50, 500);
+
+        StateActions.Debug = false;
 
         var result1 = Solve1(player, boss);
         Console.WriteLine($"Result 1 = {result1}");
@@ -24,6 +27,7 @@ internal partial class Program
 
         var result2 = Solve2(player, boss);
         Console.WriteLine($"Result 2 = {result2}");
+        Assert.AreEqual(1289, result2);
     }
 
     private static Boss ParseInput(string input)
@@ -44,80 +48,117 @@ internal partial class Program
 
     private static void Test1()
     {
-        var state = new State(new Player(10, 250), new Boss(13, 8));
-        Console.WriteLine(state);
+        StateActions.Debug = false;
 
-        var step1 = state.MakeAction(PlayerAction.Poison);
-        Console.WriteLine(step1);
+        var state = new State(new Player(10, 250), new Boss(13, 8))
+            .MakeAction(Spell.Poison)
+            .MakeAction(Spell.MagicMissile);
 
-        var step2 = step1.MakeAction(PlayerAction.MagicMissile);
-        Console.WriteLine(step2);
-
-        Assert.IsTrue(step2.IsWin);
+        Assert.IsTrue(state.IsWin);
     }
 
     private static void Test2()
     {
+        StateActions.Debug = false;
+
         var state = new State(new Player(10, 250), new Boss(14, 8));
 
-        var end = state.MakeAction(PlayerAction.Recharge)
-            .MakeAction(PlayerAction.Shield)
-            .MakeAction(PlayerAction.Drain)
-            .MakeAction(PlayerAction.Poison)
-            .MakeAction(PlayerAction.MagicMissile);
+        var spells = new Spell[] {
+            Spell.Recharge,
+            Spell.Shield,
+            Spell.Drain,
+            Spell.Poison,
+            Spell.MagicMissile,
+        };
 
-        Console.WriteLine(end);
+        var s = state;
+        foreach (var spell in spells)
+        {
+            s = s.MakeAction(spell);
+        }
 
-        Assert.IsTrue(end.IsWin);
+        Assert.IsTrue(s.IsWin);
     }
 
-    private static IEnumerable<PlayerAction> CanDo(State state)
+    private static void Test3()
+    {
+        StateActions.Debug = false;
+
+        var state = new State(new Player(50, 500), new Boss(55, 8));
+
+        var spells = new Spell[] {
+            Spell.Poison,
+            Spell.Drain,
+            Spell.Recharge,
+            Spell.Poison,
+            Spell.Shield,
+            Spell.Recharge,
+            Spell.Poison,
+            Spell.Drain,
+            Spell.MagicMissile,
+        };
+
+        var s = state;
+        foreach (var spell in spells)
+        {
+            s = s.MakeAction(spell);
+        }
+
+        Assert.IsTrue(s.IsWin);
+    }
+
+    private static IEnumerable<Spell> CanDo(State state)
     {
         var mana = state.Player.Mana;
+        if (state.RechargeTimer > 0)
+        {
+            mana += 101;
+        }
+
         if (mana < 53)
         {
             yield break;
         }
-        yield return PlayerAction.MagicMissile;
+        yield return Spell.MagicMissile;
 
         if (mana < 73)
         {
             yield break;
         }
-        yield return PlayerAction.Drain;
+        yield return Spell.Drain;
 
         if (mana < 113)
         {
             yield break;
         }
-        if (state.ShieldTimer == 0)
+        if (state.ShieldTimer <= 1)
         {
-            yield return PlayerAction.Shield;
+            yield return Spell.Shield;
         }
 
         if (mana < 173)
         {
             yield break;
         }
-        if (state.PoisonTimer == 0)
+        if (state.PoisonTimer <= 1)
         {
-            yield return PlayerAction.Poison;
+            yield return Spell.Poison;
         }
 
         if (mana < 229)
         {
             yield break;
         }
-        if (state.RechargeTimer == 0)
+        if (state.RechargeTimer <= 1)
         {
-            yield return PlayerAction.Recharge;
+            yield return Spell.Recharge;
         }
     }
 
     private static int Solve1(Player player, Boss boss)
     {
         var start = new State(player, boss);
-        var minWinMana = FindMinMana(start, (s, a) => s.MakeAction(a), 0, int.MaxValue);
+        var minWinMana = FindMinMana(start, (s, a) => s.MakeAction(a), 0, int.MaxValue, Enumerable.Empty<Spell>());
 
         return minWinMana;
     }
@@ -125,30 +166,38 @@ internal partial class Program
     private static int Solve2(Player player, Boss boss)
     {
         var start = new State(player, boss);
-        var minWinMana = FindMinMana(start, (s, a) => s.MakeActionHard(a), 0, int.MaxValue);
+        var minWinMana = FindMinMana(start, (s, a) => s.MakeActionHard(a), 0, int.MaxValue, Enumerable.Empty<Spell>());
 
         return minWinMana;
     }
 
-    private static int FindMinMana(State state, Func<State, PlayerAction, State> makeAction, int usedMana, int currentMinMana, int depth = 0)
+    private static int FindMinMana(State state, Func<State, Spell, State> makeAction, int usedMana, int currentMinMana, IEnumerable<Spell> spells, int depth = 0)
     {
+        Assert.IsFalse(state.Player.IsDead);
+        Assert.IsFalse(state.Boss.IsDead);
+        Assert.AreEqual(usedMana, spells.Sum(s => StateActions.ManaCost[s]));
+
         var minMana = currentMinMana;
-        var possibleMoves = CanDo(state).ToArray();
+        var possibleMoves = CanDo(state).Where(m => StateActions.ManaCost[m] + usedMana < minMana).ToArray();
+
         foreach (var move in possibleMoves)
         {
             var cost = StateActions.ManaCost[move];
-            if (usedMana + cost >= minMana)
-            {
-                continue;
-            }
-
             var newState = makeAction(state, move);
             if (newState.IsFinished)
             {
                 if (newState.IsWin)
                 {
-                    PrintDepth(depth, $"Player won, {usedMana + cost} mana");
-                    minMana = usedMana + cost;
+                    //PrintDepth(depth, $"Player won, {usedMana + cost} mana");
+                    //PrintSpells(spells.Append(move));
+                    //Console.WriteLine(newState);
+                    if (usedMana + cost < minMana)
+                    {
+                        minMana = usedMana + cost;
+                    }
+                    else
+                    {
+                    }
                 }
                 else
                 {
@@ -158,10 +207,13 @@ internal partial class Program
             }
             else
             {
-                var min = FindMinMana(newState, makeAction, usedMana + cost, minMana, depth + 1);
+                var min = FindMinMana(newState, makeAction, usedMana + cost, minMana, spells.Append(move), depth + 1);
                 if (min < minMana)
                 {
                     minMana = min;
+                }
+                else
+                {
                 }
             }
         }
@@ -169,11 +221,20 @@ internal partial class Program
         return minMana;
     }
 
+    private static void PrintSpells(IEnumerable<Spell> spells)
+    {
+        foreach (var spell in spells)
+        {
+            Console.Write($"{spell} ({StateActions.ManaCost[spell]}); ");
+        }
+        Console.WriteLine($"Total {spells.Sum(s => StateActions.ManaCost[s])}");
+    }
+
     private static void PrintDepth(int depth, string text)
     {
         for (var i = 0; i < depth; i++)
         {
-            Console.Write(">\t");
+            Console.Write("> ");
         }
         Console.WriteLine(text);
     }

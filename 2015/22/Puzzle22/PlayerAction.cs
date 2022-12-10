@@ -1,6 +1,6 @@
 ﻿namespace Puzzle22;
 
-public enum PlayerAction
+public enum Spell
 {
     MagicMissile,
     Drain,
