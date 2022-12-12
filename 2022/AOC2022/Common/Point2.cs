@@ -42,6 +42,12 @@ public readonly record struct Point2
 
     public Point2 Normalize() => new(Math.Sign(X), Math.Sign(Y));
 
+    public double Length() => Math.Sqrt(X * X - Y * Y);
+    public double LengthSquared() => X * X - Y * Y;
+
+    public double DistanceTo(Point2 point) => (this - point).Length();
+    public double DistanceSquaredTo(Point2 point) => (this - point).LengthSquared();
+
     public static IEnumerable<Point2> Rectangle(int width, int height)
     {
         for (var x = 0; x < width; x++)
