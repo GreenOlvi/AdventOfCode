@@ -50,23 +50,17 @@ public class Day12 : CustomBaseDay
         return (new Grid<int>(rows.ToArray()), start.Value, end.Value);
     }
 
-    public override ValueTask<string> Solve_1()
+    private static Dictionary<Point2, int> FindDistances(Grid<int> grid, Point2 e)
     {
-        var dist = FindDistances(_grid, _start, _end);
-        return dist[_end].ToResult();
-    }
-
-    private static Dictionary<Point2, int> FindDistances(Grid<int> grid, Point2 s, Point2 e)
-    {
-        double Weight(Point2 point) => - point.DistanceSquaredTo(e);
+        double Weight(Point2 point) => point.DistanceSquaredTo(e);
 
         var dist = new Dictionary<Point2, int>
         {
-            [s] = 0
+            [e] = 0
         };
 
         var queue = new PriorityQueue<Point2, double>();
-        queue.Enqueue(s, 0);
+        queue.Enqueue(e, 0);
 
         while (queue.TryDequeue(out var p, out _))
         {
@@ -94,22 +88,23 @@ public class Day12 : CustomBaseDay
 
     private static readonly Point2[] Neighbours = new[] { Point2.Up, Point2.Down, Point2.Left, Point2.Right };
     private static IEnumerable<Point2> GetNeighboursFrom(Grid<int> grid, Point2 p) =>
-        Neighbours.Select(n => p + n).Where(grid.IsInside).Where(n => grid[n] - 1 <= grid[p]);
+        Neighbours.Select(n => p + n).Where(grid.IsInside).Where(n => grid[p] - 1 <= grid[n]);
+
+    public override ValueTask<string> Solve_1()
+    {
+        var dist = FindDistances(_grid, _end);
+        return dist[_start].ToResult();
+    }
 
     public override ValueTask<string> Solve_2()
     {
-        var aPoints = _grid.EnumeratePoints().Where(p => _grid[p] == 0).ToArray();
+        var dist = FindDistances(_grid, _end);
+        var aPoints = _grid.EnumeratePoints()
+            .Where(p => _grid[p] == 0);
 
-        var lowestDist = int.MaxValue;
-        foreach (var a in aPoints)
-        {
-            var dist = FindDistances(_grid, a, _end);
-            if (dist.TryGetValue(_end, out var d) && d < lowestDist)
-            {
-                lowestDist = d;
-            }
-        }
-
-        return lowestDist.ToResult();
+        return aPoints.Where(dist.ContainsKey)
+            .Select(a => dist[a])
+            .Min()
+            .ToResult();
     }
 }
