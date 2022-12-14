@@ -1,20 +1,19 @@
-﻿using System.Reflection.Metadata;
-using System.Text;
+﻿using System.Text;
 
 namespace AOC2022.Puzzles;
 
 public class Day14 : CustomBaseDay
 {
-    private readonly string[] _lines;
+    private readonly Point2[][] _rocks;
 
     public Day14()
     {
-        _lines = ReadLinesFromFile().ToArray();
+        _rocks = ParseInput(ReadLinesFromFile()).ToArray();
     }
 
     public Day14(IEnumerable<string> lines)
     {
-        _lines = lines.ToArray();
+        _rocks = ParseInput(lines).ToArray();
     }
 
     private static IEnumerable<Point2[]> ParseInput(IEnumerable<string> lines) => lines.Select(ParseLine);
@@ -85,29 +84,6 @@ public class Day14 : CustomBaseDay
         }
 
         throw new InvalidOperationException();
-    }
-
-    public override ValueTask<string> Solve_1()
-    {
-        var rocks = ParseInput(_lines).ToArray();
-        var grid = new HashGrid();
-
-        FillRock(grid, rocks);
-        grid[(500, 0)] = Tile.Source;
-
-        var limit = grid.LowerBorder;
-
-        var finished = false;
-
-        var i = 0;
-        while (!finished)
-        {
-            finished = Simulate(grid, new Point2(500, 0), limit);
-            //var drawing = grid.Draw();
-            i++;
-        }
-
-        return (i - 1).ToResult();
     }
 
     private static readonly Point2 DownLeft = Point2.Down + Point2.Left;
@@ -186,27 +162,39 @@ public class Day14 : CustomBaseDay
         }
 
         grid[sand] = Tile.Sand;
-
         return sand.X == 500 && sand.Y == 0;
+    }
+
+    public override ValueTask<string> Solve_1()
+    {
+        var grid = new HashGrid();
+        FillRock(grid, _rocks);
+        grid[(500, 0)] = Tile.Source;
+
+        var limit = grid.LowerBorder;
+        var finished = false;
+        var i = 0;
+        while (!finished)
+        {
+            finished = Simulate(grid, new Point2(500, 0), limit);
+            i++;
+        }
+
+        return (i - 1).ToResult();
     }
 
     public override ValueTask<string> Solve_2()
     {
-        var rocks = ParseInput(_lines).ToArray();
         var grid = new HashGrid();
-
-        FillRock(grid, rocks);
+        FillRock(grid, _rocks);
         grid[(500, 0)] = Tile.Source;
 
         var limit = grid.LowerBorder;
-
         var finished = false;
-
         var i = 0;
         while (!finished)
         {
             finished = Simulate2(grid, new Point2(500, 0), limit);
-            //var drawing = grid.Draw();
             i++;
         }
 
