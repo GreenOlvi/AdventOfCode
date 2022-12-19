@@ -43,6 +43,21 @@ public static class RegexExtensions
         return true;
     }
 
+    public static bool TryMatchAll<T>(this Regex regex, string input, out Dictionary<string, T> values) where T : IParsable<T>
+    {
+        if (!regex.TryMatch(input, out var match))
+        {
+            values = new Dictionary<string, T>();
+            return false;
+        }
+        values = match.Groups.Keys
+            .Where(k => k != "0")
+            .Select(k => (k, T.Parse(match.Groups[k].Value, null)))
+            .ToDictionary();
+        return true;
+    }
+
+
     public static bool TryParse<T>(this Regex regex, string input, string group, Func<string, T> converter, out T value)
     {
         if (!regex.TryMatch(input, group, out var val))
