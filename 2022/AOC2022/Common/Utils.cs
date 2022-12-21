@@ -64,11 +64,8 @@ public static class Utils
 
     public static long Modulo(this long a, long n)
     {
-        while (a < 0)
-        {
-            a += n;
-        }
-        return a % n;
+        var r = a % n;
+        return r < 0 ? r + n : r;
     }
 
     public static byte Modulo(this byte a, byte n) => (byte)(a % n);
