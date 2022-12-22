@@ -41,8 +41,14 @@ public partial class Day19 : CustomBaseDay
         };
     }
 
+    private static readonly Action[] OnlyBuildGeodeBot = new[] { Action.NewGeodeBot };
+
     private static int FindMaxGeodesBFS(Recipe recipe, int maxTime)
     {
+        var mostExpensiveOre = new[] { recipe.OreBot.Ore, recipe.ClayBot.Ore, recipe.ObsidianBot.Ore, recipe.GeodeBot.Ore }.Sum();
+        var mostExpensiveClay = new[] { recipe.OreBot.Ore, recipe.ClayBot.Ore, recipe.ObsidianBot.Ore, recipe.GeodeBot.Ore }.Sum();
+        var mostExpensiveObsidian = new[] { recipe.OreBot.Obsidian, recipe.ClayBot.Obsidian, recipe.ObsidianBot.Obsidian, recipe.GeodeBot.Obsidian }.Sum();
+
         var states = new Dictionary<State, int>
         {
             [State.Initial] = 0,
@@ -75,7 +81,29 @@ public partial class Day19 : CustomBaseDay
                 continue;
             }
 
-            var possibleActions = AllActions.Where(a => CanDo(state, recipe, a)).Reverse().ToArray();
+            IEnumerable<Action> possibleActions;
+            if (CanDo(state, recipe, Action.NewGeodeBot))
+            {
+                possibleActions = OnlyBuildGeodeBot;
+            }
+            else
+            {
+                var actions = new List<Action>();
+                if (state.ObsidianBots <= mostExpensiveObsidian && CanDo(state, recipe, Action.NewObsidianBot))
+                {
+                    actions.Add(Action.NewObsidianBot);
+                }
+                if (state.ClayBots <= mostExpensiveClay && CanDo(state, recipe, Action.NewClayBot))
+                {
+                    actions.Add(Action.NewClayBot);
+                }
+                if (state.OreBots <= mostExpensiveOre && CanDo(state, recipe, Action.NewOreBot))
+                {
+                    actions.Add(Action.NewOreBot);
+                }
+                actions.Add(Action.Wait);
+                possibleActions = actions;
+            }
 
             state = CollectResources(state);
             time++;
