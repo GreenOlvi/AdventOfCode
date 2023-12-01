@@ -62,7 +62,9 @@ public static class RegexExtensions
     {
         if (!regex.TryMatch(input, group, out var val))
         {
+#pragma warning disable CS8601 // Possible null reference assignment.
             value = default;
+#pragma warning restore CS8601 // Possible null reference assignment.
             return false;
         }
         value = converter(val);
