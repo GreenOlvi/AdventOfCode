@@ -21,6 +21,6 @@ Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green
     public async ValueTask Solve2Test()
     {
         var day = new Day02(_testInput1.Split("\n", StringSplitOptions.TrimEntries));
-        (await day.Solve_2()).Should().Be("result 2");
+        (await day.Solve_2()).Should().Be("2286");
     }
 }

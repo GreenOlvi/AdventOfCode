@@ -25,30 +25,36 @@ public sealed class HashGrid<Tile>() where Tile : struct
     public long MinY => _tiles.Keys.Min(p => p.Y);
     public long MinX => _tiles.Keys.Min(p => p.X);
     public long MaxX => _tiles.Keys.Max(p => p.X);
+
+    public IEnumerable<(Point2, Tile)> Where(Func<(Point2, Tile), bool> predicate)
+    {
+        return _tiles.Select(kv => (kv.Key, kv.Value))
+            .Where(kv => predicate(kv));
+    }
 }
 
 public static class HashGridExtensions
 {
-    public static string Draw<T>(this HashGrid<T> grid, IDictionary<T, char> tileChars) where T : struct
+    public static string Draw<T>(this HashGrid<T> grid, Func<T, char> tileToChar, Point2 topLeft, Point2 bottomRight) where T : struct
     {
         var sb = new StringBuilder();
-
-        var minX = grid.MinX - 1;
-        var minY = grid.MinY - 1;
-        var maxX = grid.MaxX + 1;
-        var maxY = grid.MaxY + 1;
-
-        for (var y = minY; y <= maxY; y++)
+        for (var y = topLeft.Y; y <= bottomRight.Y; y++)
         {
-            for (var x = minX; x <= maxX; x++)
+            for (var x = topLeft.X; x <= bottomRight.X; x++)
             {
-                var ch = tileChars[grid[(x, y)]];
+                var ch = tileToChar(grid[(x, y)]);
                 sb.Append(ch);
             }
             sb.AppendLine();
         }
         return sb.ToString();
     }
+
+    public static string Draw<T>(this HashGrid<T> grid, Func<T, char> tileToChar) where T : struct =>
+        grid.Draw(tileToChar, new Point2(grid.MinX - 1, grid.MinY - 1), new Point2(grid.MaxX + 1, grid.MaxY + 1));
+
+    public static string Draw<T>(this HashGrid<T> grid, IDictionary<T, char> tileChars) where T : struct =>
+        Draw(grid, t => tileChars[t]);
 
     private static readonly Dictionary<bool, char> _boolTileChars = new()
     {
@@ -57,4 +63,8 @@ public static class HashGridExtensions
     };
 
     public static string Draw(this HashGrid<bool> grid) => Draw(grid, _boolTileChars);
+
+    public static string Draw(this HashGrid<char> grid) => Draw(grid, c => c == '\0' ? ' ' : c);
+    public static string Draw(this HashGrid<char> grid, Point2 topLeft, Point2 bottomRight) =>
+        Draw(grid, c => c == '\0' ? ' ' : c, topLeft, bottomRight);
 }

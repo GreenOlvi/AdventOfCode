@@ -1,5 +1,5 @@
 ﻿namespace AOC2023.Common;
-public class Point2
+public readonly record struct Point2
 {
     public long X { get; init; }
     public long Y { get; init; }
