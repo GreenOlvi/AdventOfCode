@@ -1,161 +1,101 @@
-﻿namespace AOC2023.Puzzles;
+﻿using AOC2022.Common;
+
+namespace AOC2023.Puzzles;
 public class Day03 : CustomBaseDay
 {
-    private readonly string[] _lines;
+    private readonly Schematic _schematic;
 
     public Day03()
     {
-        _lines = ReadLinesFromFile().ToArray();
+        _schematic = ParseSchematic(ReadLinesFromFile());
     }
 
     public Day03(IEnumerable<string> lines)
     {
-        _lines = lines.ToArray();
+        _schematic = ParseSchematic(lines);
     }
 
-    private static IEnumerable<Point2> GetNeighbours(Point2 point)
-    {
-        yield return point + new Point2(-1, -1);
-        yield return point + new Point2(0, -1);
-        yield return point + new Point2(+1, -1);
-        yield return point + new Point2(-1, 0);
-        yield return point + new Point2(+1, 0);
-        yield return point + new Point2(-1, +1);
-        yield return point + new Point2(0, +1);
-        yield return point + new Point2(+1, +1);
-    }
-
-    private static bool IsSymbol(char c) => (c < '0' || c > '9') && c != '\0';
+    private static bool IsSymbol(char c) => (c < '0' || c > '9') && c != '\0' && c != '.';
 
     private static bool IsNumber(char c) => char.IsAsciiDigit(c);
 
-
-    public override ValueTask<string> Solve_1()
+    private static Schematic ParseSchematic(IEnumerable<string> lines)
     {
-        var grid = ParseGrid();
+        var numbers = new List<Number>();
+        var symbols = new List<Symbol>();
 
-        var numbers = new Queue<Point2>(grid.Where(kv => IsNumber(kv.Item2)).Select(kv => kv.Item1));
-
-        var partNumbers = new List<int>();
-
-        while (numbers.Count > 0)
-        {
-            var point = numbers.Dequeue();
-            var isPartNumber = false;
-            var wholeNumber = grid[point] - '0';
-
-            do
-            {
-                if (GetNeighbours(point).Any(p => IsSymbol(grid[p])))
-                {
-                    isPartNumber = true;
-                }
-
-                var next = point + new Point2(1, 0);
-                var nextChar = grid[next];
-                if (IsNumber(nextChar))
-                {
-                    point = next;
-                    wholeNumber = wholeNumber * 10 + (nextChar - '0');
-                    _ = numbers.Dequeue();
-                }
-                else
-                {
-                    if (isPartNumber)
-                    {
-                        partNumbers.Add(wholeNumber);
-                    }
-                    break;
-                }
-            }
-            while (true);
-        }
-
-        return partNumbers.Sum().ToResult();
-    }
-
-    private HashGrid<char> ParseGrid()
-    {
-        var grid = new HashGrid<char>();
         var y = 0;
-        foreach (var line in _lines)
+        foreach (var line in lines)
         {
             var x = 0;
-            foreach (var c in line)
+            while (x < line.Length)
             {
-                if (c != '.')
+                var c = line[x];
+                if (IsNumber(c))
                 {
-                    grid[(x, y)] = c;
+                    var n = 0;
+                    var xp = x;
+                    do
+                    {
+                        n = n * 10 + line[xp] - '0';
+                        xp++;
+                    }
+                    while(xp < line.Length && IsNumber(line[xp]));
+
+                    numbers.Add(new Number(n, new Point2(x, y), new Point2(xp - 1, y)));
+                    x = xp - 1;
+                }
+                else if (IsSymbol(c))
+                {
+                    symbols.Add(new Symbol(c, new Point2(x, y)));
                 }
                 x++;
             }
             y++;
         }
 
-        return grid;
-    }
+        var numberAdjacency = new Dictionary<Number, List<Symbol>>();
+        var symbolAdjacency = new Dictionary<Symbol, List<Number>>();
 
-    public override ValueTask<string> Solve_2()
-    {
-        var grid = ParseGrid();
+        var symbolPositions = symbols.ToDictionary(s => s.Position);
 
-        var stars = new Queue<Point2>(grid.Where(kv => kv.Item2 == '*').Select(kv => kv.Item1));
-
-        var gears = new List<(long, long)>();
-        while (stars.Count > 0)
+        foreach (var number in numbers)
         {
-            var gear = stars.Dequeue();
-
-            var neighbourNumbers = GetNeighbours(gear).Where(p => IsNumber(grid[p])).ToHashSet();
-            if (neighbourNumbers.Count < 2)
+            var adjacentPoints = new Box(number.Start + new Point2(-1, -1), number.End + new Point2(1, 1)).GetPoints();
+            var adjacentSymbols = adjacentPoints.Where(symbolPositions.ContainsKey).Select(p => symbolPositions[p]).ToList();
+            foreach (var symbol in adjacentSymbols)
             {
-                continue;
-            }
-
-            var neighbours = new List<int>();
-            while (neighbourNumbers.Count > 0)
-            {
-                var n = neighbourNumbers.First();
-                var (number, pos) = FindWholeNumber(grid, n);
-
-                neighbours.Add(number);
-                foreach(var p in pos)
+                numberAdjacency[number] = adjacentSymbols;
+                if (symbolAdjacency.TryGetValue(symbol, out List<Number>? value))
                 {
-                    neighbourNumbers.Remove(p);
+                    value.Add(number);
+                }
+                else
+                {
+                    symbolAdjacency[symbol] = [number];
                 }
             }
-
-            if (neighbours.Count != 2)
-            {
-                continue;
-            }
-
-            gears.Add((neighbours[0], neighbours[1]));
         }
 
-        return gears.Sum(p => p.Item1 * p.Item2).ToResult();
+        return new Schematic(numbers, symbols, numberAdjacency, symbolAdjacency);
     }
 
-    private static (int Number, HashSet<Point2> Positions) FindWholeNumber(HashGrid<char> grid, Point2 start)
-    {
-        var pointer = start;
-        do
-        {
-            pointer = pointer.Move(Direction.Left);
-        }
-        while (IsNumber(grid[pointer]));
+    public override ValueTask<string> Solve_1() =>
+        _schematic.NumberAdjacency
+            .Where(kv => kv.Value.Count > 0)
+            .Select(kv => kv.Key.Value)
+            .Sum()
+            .ToResult();
 
-        pointer = pointer.Move(Direction.Right);
+    public override ValueTask<string> Solve_2() =>
+        _schematic.SymbolAdjacency
+            .Where(kv => kv.Key.Type == '*' && kv.Value.Count == 2)
+            .Sum(kv => kv.Value.Product(n => n.Value))
+            .ToResult();
 
-        var n = 0;
-        var pos = new HashSet<Point2>();
-        while (IsNumber(grid[pointer]))
-        {
-            n = 10 * n + grid[pointer] - '0';
-            pos.Add(pointer);
-            pointer = pointer.Move(Direction.Right);
-        }
+    private record Schematic(IReadOnlyList<Number> Numbers, IReadOnlyList<Symbol> Symbols,
+        Dictionary<Number, List<Symbol>> NumberAdjacency, Dictionary<Symbol, List<Number>> SymbolAdjacency);
 
-        return (n, pos);
-    }
+    private readonly record struct Number(int Value, Point2 Start, Point2 End);
+    private readonly record struct Symbol(char Type, Point2 Position);
 }

@@ -51,5 +51,8 @@ public static class Utils
         }
     }
 
+    public static long Product(this IEnumerable<long> numbers) => numbers.Aggregate(1L, (a, b) => a * b);
+    public static long Product<T>(this IEnumerable<T> elements, Func<T, long> selector) => elements.Select(selector).Product();
+
     public static ValueTask<string> ToResult<T>(this T value) => new(value?.ToString() ?? "<null>");
 }
