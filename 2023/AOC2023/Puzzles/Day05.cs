@@ -60,27 +60,28 @@ public partial class Day05 : CustomBaseDay
         return value;
     }
 
-    private long GetLowestConvertToEnd(Range seedRange)
+    private long GetLowestConvertToEnd(IEnumerable<Range> seedRanges)
     {
-        Range[] currentRanges = [seedRange];
+        var currentRanges = seedRanges.ToList();
         var mapName = "seed";
 
-        while (_almanac.HasMap(mapName))
+        do
         {
             var map = _almanac.GetMap(mapName);
-            var newRanges = currentRanges.SelectMany(r => map.FindMatchingRanges(r)).ToArray();
-            currentRanges = newRanges;
+            currentRanges = currentRanges.SelectMany(map.FindMatchingRanges).ToList();
             mapName = _almanac.GetNextMapName(mapName);
         }
+        while (_almanac.HasMap(mapName));
 
         return currentRanges.Min(r => r.Start);
     }
+
 
     public override ValueTask<string> Solve_1() =>
         _almanac.Seeds.Min(ConvertToEnd).ToResult();
 
     public override ValueTask<string> Solve_2() =>
-        _almanac.SeedRanges.Min(GetLowestConvertToEnd).ToResult();
+        GetLowestConvertToEnd(_almanac.SeedRanges).ToResult();
 
     private class Almanac(long[] Seeds, IEnumerable<Range> SeedsRanges, IEnumerable<Map> Maps)
     {
