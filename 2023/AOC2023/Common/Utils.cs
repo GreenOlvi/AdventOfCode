@@ -52,6 +52,28 @@ public static class Utils
         }
     }
 
+    public static long GreatestCommonDivisor(long a, long b)
+    {
+        while (b != 0)
+        {
+            var r = a % b;
+            (a, b) = (b, r);
+        }
+
+        return Math.Abs(a);
+    }
+
+    public static long LeastCommonMultiple(long a, long b)
+    {
+        if ((a == 0) || (b == 0))
+        {
+            return 0;
+        }
+
+        return Math.Abs((a / GreatestCommonDivisor(a, b)) * b);
+    }
+
+
     public static long Product(this IEnumerable<int> numbers) => numbers.Aggregate(1, (a, b) => a * b);
     public static long Product(this IEnumerable<long> numbers) => numbers.Aggregate(1L, (a, b) => a * b);
     public static long Product<T>(this IEnumerable<T> elements, Func<T, long> selector) => elements.Select(selector).Product();

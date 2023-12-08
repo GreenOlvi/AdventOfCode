@@ -4,7 +4,7 @@ internal class Program
 {
     private static readonly Action<SolverConfiguration> _solverConfig = c =>
     {
-        c.ClearConsole = true;
+        c.ClearConsole = false;
         c.ShowConstructorElapsedTime = true;
         c.ShowTotalElapsedTimePerDay = true;
         c.ShowOverallResults = true;
