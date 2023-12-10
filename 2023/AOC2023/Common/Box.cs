@@ -1,4 +1,4 @@
-﻿namespace AOC2022.Common;
+﻿namespace AOC2023.Common;
 
 public readonly record struct Box(Point2 TopLeft, Point2 BottomRight)
 {

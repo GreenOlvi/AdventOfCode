@@ -1,6 +1,4 @@
-﻿using AOC2022.Common;
-
-namespace AOC2023.Puzzles;
+﻿namespace AOC2023.Puzzles;
 public partial class Day02 : CustomBaseDay
 {
     private readonly Game[] _games;

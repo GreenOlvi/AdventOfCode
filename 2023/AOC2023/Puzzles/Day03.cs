@@ -1,6 +1,4 @@
-﻿using AOC2022.Common;
-
-namespace AOC2023.Puzzles;
+﻿namespace AOC2023.Puzzles;
 public class Day03 : CustomBaseDay
 {
     private readonly Schematic _schematic;

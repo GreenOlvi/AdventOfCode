@@ -1,6 +1,4 @@
-﻿using AOC2022.Common;
-
-namespace AOC2023.Common;
+﻿namespace AOC2023.Common;
 public sealed class HashGrid<Tile>() where Tile : struct
 {
     private readonly Dictionary<Point2, Tile> _tiles = [];

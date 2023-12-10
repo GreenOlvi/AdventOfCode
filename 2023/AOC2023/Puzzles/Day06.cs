@@ -1,7 +1,4 @@
-﻿
-using Spectre.Console;
-
-namespace AOC2023.Puzzles;
+﻿namespace AOC2023.Puzzles;
 public class Day06 : CustomBaseDay
 {
     private readonly Record[] _records1;

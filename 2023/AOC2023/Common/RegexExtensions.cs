@@ -1,7 +1,4 @@
-﻿using System.Text.RegularExpressions;
-
-namespace AOC2022.Common;
-
+﻿namespace AOC2023.Common;
 public static class RegexExtensions
 {
     public static bool TryMatch(this Regex regex, string input, out Match match)
