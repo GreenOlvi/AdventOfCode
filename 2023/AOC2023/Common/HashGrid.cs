@@ -1,4 +1,6 @@
-﻿namespace AOC2023.Common;
+﻿using AOC2022.Common;
+
+namespace AOC2023.Common;
 public sealed class HashGrid<Tile>() where Tile : struct
 {
     private readonly Dictionary<Point2, Tile> _tiles = [];
@@ -26,11 +28,11 @@ public sealed class HashGrid<Tile>() where Tile : struct
     public long MinX => _tiles.Keys.Min(p => p.X);
     public long MaxX => _tiles.Keys.Max(p => p.X);
 
-    public IEnumerable<(Point2, Tile)> Where(Func<(Point2, Tile), bool> predicate)
-    {
-        return _tiles.Select(kv => (kv.Key, kv.Value))
-            .Where(kv => predicate(kv));
-    }
+    public IEnumerable<(Point2, Tile)> Where(Func<(Point2, Tile), bool> predicate) =>
+        _tiles.Select(kv => (Position: kv.Key, Tile: kv.Value))
+            .Where(predicate);
+
+    public Box GetSurroundingBox() => new(new Point2(MinX, MinY), new Point2(MaxX, MaxY));
 }
 
 public static class HashGridExtensions
