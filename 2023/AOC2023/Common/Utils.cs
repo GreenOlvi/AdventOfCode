@@ -79,4 +79,16 @@ public static class Utils
     public static long Product<T>(this IEnumerable<T> elements, Func<T, long> selector) => elements.Select(selector).Product();
 
     public static ValueTask<string> ToResult<T>(this T value) => new(value?.ToString() ?? "<null>");
+
+    public static IEnumerable<(T, T)> EachPair<T>(IEnumerable<T> items)
+    {
+        var p = items.ToArray();
+        for (var i = 0; i < p.Length - 1; i++)
+        {
+            for (var j = i + 1; j < p.Length; j++)
+            {
+                yield return (p[i], p[j]);
+            }
+        }
+    }
 }
