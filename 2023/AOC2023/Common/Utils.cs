@@ -73,6 +73,17 @@ public static class Utils
         return Math.Abs((a / GreatestCommonDivisor(a, b)) * b);
     }
 
+    public static IEnumerable<T> Repeat<T>(this IEnumerable<T> items, int count)
+    {
+        var itemArray = items.ToArray();
+        for (var i = 0; i < count; i++)
+        {
+            foreach(var item in itemArray)
+            {
+                yield return item;
+            }
+        }
+    }
 
     public static long Product(this IEnumerable<int> numbers) => numbers.Aggregate(1, (a, b) => a * b);
     public static long Product(this IEnumerable<long> numbers) => numbers.Aggregate(1L, (a, b) => a * b);
