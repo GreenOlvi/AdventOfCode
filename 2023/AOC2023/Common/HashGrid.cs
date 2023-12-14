@@ -3,6 +3,11 @@ public sealed class HashGrid<Tile>() where Tile : struct
 {
     private readonly Dictionary<Point2, Tile> _tiles = [];
 
+    private HashGrid(IEnumerable<KeyValuePair<Point2, Tile>> tiles) : this()
+    {
+        _tiles = tiles.ToDictionary();
+    }
+
     public Tile this[(long x, long y) p]
     {
         get => _tiles.TryGetValue(new Point2(p), out var tile) ? tile : default;
@@ -31,6 +36,8 @@ public sealed class HashGrid<Tile>() where Tile : struct
             .Where(predicate);
 
     public Box GetSurroundingBox() => new(new Point2(MinX, MinY), new Point2(MaxX, MaxY));
+
+    public HashGrid<Tile> Clone() => new(_tiles);
 }
 
 public static class HashGridExtensions
