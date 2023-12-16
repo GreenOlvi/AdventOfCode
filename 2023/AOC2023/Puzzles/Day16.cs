@@ -168,6 +168,7 @@ public class Day16 : CustomBaseDay
         [Direction.Down] = Direction.Right,
     };
 
+#pragma warning disable IDE0052 // Remove unread private members
     private static readonly Dictionary<Tile, char> _tilesToChar = new()
     {
         [Tile.Empty] = '.',
@@ -177,6 +178,7 @@ public class Day16 : CustomBaseDay
         [Tile.SplitterVertical] = '|',
         [Tile.SplitterHorizontal] = '-',
     };
+#pragma warning restore IDE0052 // Remove unread private members
 
     private enum Tile
     {
