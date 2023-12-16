@@ -32,6 +32,7 @@ public readonly record struct Point2
     public override string ToString() => $"({X},{Y})";
 
     public static readonly Point2 Zero = new(0, 0);
+    public static readonly Point2 One = new(1, 1);
     public static readonly Point2 Left = new(-1, 0);
     public static readonly Point2 Right = new(1, 0);
     public static readonly Point2 Up = new(0, -1);
