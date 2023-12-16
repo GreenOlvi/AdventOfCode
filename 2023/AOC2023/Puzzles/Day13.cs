@@ -58,11 +58,53 @@ public class Day13 : CustomBaseDay
         return false;
     }
 
-    private static Reflections FindReflection(Pattern pattern)
+    private static readonly HashSet<ulong> IsOneBit = Enumerable.Range(0, 63).Select(i => 1UL << i).ToHashSet();
+
+    private static bool AreEqualOrDifferByOneBit(ulong a, ulong b, out bool flaw)
+    {
+        if (a == b)
+        {
+            flaw = false;
+            return true;
+        }
+
+        flaw = true;
+        return IsOneBit.Contains(a ^ b);
+    }
+
+    private static bool IsReflectionWithFlaw(IReadOnlyList<ulong> lines, int i)
+    {
+        var hasFlaw = false;
+        var maxJ = Math.Min(i, lines.Count - 2 - i);
+        for (var j = 0; j <= maxJ; j++)
+        {
+            var a = lines[i - j];
+            var b = lines[i + j + 1];
+
+            if (!AreEqualOrDifferByOneBit(a, b, out var f))
+            {
+                return false;
+            }
+
+            if (hasFlaw && f)
+            {
+                return false;
+            }
+
+            if (f)
+            {
+                hasFlaw = true;
+            }
+        }
+
+        return hasFlaw;
+    }
+
+    private static Reflections FindReflections(Pattern pattern, Func<IReadOnlyList<ulong>, int, bool> isReflection)
     {
         for (var i = 0; i < pattern.Rows.Count - 1; i++)
         {
-            if (IsReflection(pattern.Rows, i))
+            if (isReflection(pattern.Rows, i))
             {
                 return new Reflections(i + 1, 0);
             }
@@ -70,7 +112,7 @@ public class Day13 : CustomBaseDay
 
         for (var i = 0; i < pattern.Columns.Count - 1; i++)
         {
-            if (IsReflection(pattern.Columns, i))
+            if (isReflection(pattern.Columns, i))
             {
                 return new Reflections(0, pattern.Columns.Count - i - 1);
             }
@@ -81,19 +123,18 @@ public class Day13 : CustomBaseDay
 
     public override ValueTask<string> Solve_1()
     {
-        var reflections = _patterns.Select(FindReflection).Aggregate((a, b) => a + b);
+        var reflections = _patterns.Select(p => FindReflections(p, IsReflection)).Aggregate((a, b) => a + b);
         return (reflections.Rows * 100 + reflections.Columns).ToResult();
     }
 
     public override ValueTask<string> Solve_2()
     {
-        return "result 2".ToResult();
+        var reflections = _patterns.Select(p => FindReflections(p, IsReflectionWithFlaw)).Aggregate((a, b) => a + b);
+        return (reflections.Rows * 100 + reflections.Columns).ToResult();
     }
 
     private readonly record struct Pattern(List<List<bool>> Patterns)
     {
-        public List<List<bool>> Patterns { get; } = Patterns;
-
         public IReadOnlyList<ulong> Rows { get; } = ExtractRows(Patterns).ToList();
         public IReadOnlyList<ulong> Columns { get; } = ExtractColumns(Patterns).ToList();
 
@@ -129,16 +170,10 @@ public class Day13 : CustomBaseDay
             }
         }
     }
-}
 
-internal record struct Reflections(int Rows, int Columns)
-{
-    public static implicit operator (int Rows, int Columns)(Reflections value) =>
-        (value.Rows, value.Columns);
-
-    public static implicit operator Reflections((int Rows, int Columns) value) =>
-        new(value.Rows, value.Columns);
-
-    public static Reflections operator +(Reflections a, Reflections b) =>
-        new(a.Rows + b.Rows, a.Columns + b.Columns);
+    private record struct Reflections(int Rows, int Columns)
+    {
+        public static Reflections operator +(Reflections a, Reflections b) =>
+            new(a.Rows + b.Rows, a.Columns + b.Columns);
+    }
 }

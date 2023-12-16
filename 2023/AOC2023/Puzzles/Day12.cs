@@ -142,8 +142,11 @@ public class Day12 : CustomBaseDay
     public override ValueTask<string> Solve_1() =>
         _rows.Sum(CountArrangements).ToResult();
 
-    public override ValueTask<string> Solve_2() =>
-        _rows.Select(Unfold).Sum(CountArrangements).ToResult();
+    public override ValueTask<string> Solve_2()
+    {
+        throw new NotImplementedException();
+        //return _rows.Select(Unfold).Sum(CountArrangements).ToResult();
+    }
 
     private class Row(Springs Springs, IEnumerable<int> Groups)
     {
