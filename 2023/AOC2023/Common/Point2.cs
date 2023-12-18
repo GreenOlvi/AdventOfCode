@@ -18,6 +18,7 @@ public readonly record struct Point2
     public static Point2 operator +(Point2 a, Point2 b) => a.Add(b);
     public static Point2 operator -(Point2 a, Point2 b) => a.Subtract(b);
     public static Point2 operator *(Point2 a, int b) => new(a.X * b, a.Y * b);
+    public static Point2 operator *(Point2 a, long b) => new(a.X * b, a.Y * b);
 
     public Point2 Move(Direction direction) =>
         direction switch
@@ -26,6 +27,16 @@ public readonly record struct Point2
             Direction.Down => Add(Down),
             Direction.Left => Add(Left),
             Direction.Right => Add(Right),
+            _ => throw new NotImplementedException(),
+        };
+
+    public Point2 Move(Direction direction, long distance) =>
+        direction switch
+        {
+            Direction.Up => Add(Up * distance),
+            Direction.Down => Add(Down * distance),
+            Direction.Left => Add(Left * distance),
+            Direction.Right => Add(Right * distance),
             _ => throw new NotImplementedException(),
         };
 
@@ -42,4 +53,6 @@ public readonly record struct Point2
         Math.Sqrt(Math.Pow(a.X - b.X, 2) + Math.Pow(a.Y - b.Y, 2));
     public static double DistanceSquared(Point2 a, Point2 b) =>
         Math.Pow(a.X - b.X, 2) + Math.Pow(a.Y - b.Y, 2);
+    public static long ManhattanDistance(Point2 a, Point2 b) =>
+        Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y);
 }

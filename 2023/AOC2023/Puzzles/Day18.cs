@@ -17,7 +17,7 @@ public partial class Day18 : CustomBaseDay
 
     private static readonly Regex ColorPattern = BuildColorPattern();
 
-    private Instruction ParseInstruction(string line)
+    private static Instruction ParseInstruction(string line)
     {
         var parts = line.Split(' ', StringSplitOptions.TrimEntries);
         var dir = parts[0] switch
@@ -41,75 +41,66 @@ public partial class Day18 : CustomBaseDay
         return new Instruction(dir, len, color);
     }
 
-    private int DigTerrain(HashGrid<bool> grid, IEnumerable<Instruction> instructions)
+    private static IEnumerable<Point2> GetPoints(IEnumerable<Instruction> instructions) 
     {
-        var dug = 0;
-        var p = new Point2(0, 0);
-        grid[p] = true;
+        var p = Point2.Zero;
         foreach (var instruction in instructions)
         {
-            for (var i = 0; i < instruction.Length; i++)
-            {
-                p = p.Move(instruction.Direction);
-                grid[p] = true;
-                dug++;
-            }
+            yield return p;
+            p = p.Move(instruction.Direction, instruction.Length);
         }
-        return dug;
     }
 
-    private int FloodFill(HashGrid<bool> grid, Point2 start)
+    private static IEnumerable<(T, T)> SlidingWindowWithWrap<T>(IEnumerable<T> elements)
     {
-        var queue = new Queue<Point2>();
-        queue.Enqueue(start);
-
-        var painted = new HashSet<Point2>();
-
-        while (queue.Count > 0)
+        var first = elements.First();
+        var prev = first;
+        foreach (var point in elements.Skip(1))
         {
-            var p = queue.Dequeue();
-            if (painted.Contains(p))
-            {
-                continue;
-            }
-
-            painted.Add(p);
-
-            var neighbours = DirectionExtensions.AllExceptNone
-                .Select(p.Move)
-                .Where(n => !grid[n]);
-
-            foreach (var n in neighbours)
-            {
-                queue.Enqueue(n);
-            }
+            yield return (prev, point);
+            prev = point;
         }
-
-        return painted.Count;
+        yield return (prev, first);
     }
 
-    public override ValueTask<string> Solve_1()
+    private static long ShoelaceArea(IEnumerable<Point2> points)
     {
-        var grid = new HashGrid<bool>();
-
-        var edge = DigTerrain(grid, _instructions);
-        var inside = FloodFill(grid, new Point2(1, 1));
-
-        return (edge + inside).ToResult();
+        var sum = 0L;
+        foreach (var (a, b) in SlidingWindowWithWrap(points))
+        {
+            sum += a.X * b.Y - a.Y * b.X + Point2.ManhattanDistance(a, b);
+        }
+        return sum / 2 + 1;
     }
 
-    public override ValueTask<string> Solve_2()
+    public override ValueTask<string> Solve_1() =>
+        ShoelaceArea(GetPoints(_instructions)).ToResult();
+
+    public override ValueTask<string> Solve_2() =>
+        ShoelaceArea(GetPoints(_instructions.Select(i => i.FromColor()))).ToResult();
+
+    private readonly record struct Instruction(Direction Direction, int Length, Color Color)
     {
-        return "result 2".ToResult();
+        public Instruction FromColor() => new(Color.Direction, Color.Length, Color);
     }
 
-    private readonly record struct Instruction(Direction Direction, int Length, Color Color);
-
-    private readonly record struct Color(uint Value)
+    private readonly record struct Color(uint Value, Direction Direction, int Length)
     {
-        public static Color FromHex(string hex) => new(uint.Parse(hex, NumberStyles.HexNumber));
+        public static Color FromHex(string hex) => new(
+            uint.Parse(hex, NumberStyles.HexNumber),
+            DecodeDirection(hex[5]),
+            int.Parse(hex[0..5], NumberStyles.HexNumber));
 
-        public override string ToString() => $"#{Value:x6}";
+        private static Direction DecodeDirection(char c) => c switch
+        {
+            '0' => Direction.Right,
+            '1' => Direction.Down,
+            '2' => Direction.Left,
+            '3' => Direction.Up,
+            _ => throw new InvalidDataException($"Invalid direction '{c}'"),
+        };
+
+        public override string ToString() => $"#{Value:x6} = {Direction} {Length}";
     }
 
     [GeneratedRegex(@"\(#(?<value>[0-9a-f]{6})\)")]

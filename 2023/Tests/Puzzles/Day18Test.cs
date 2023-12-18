@@ -30,6 +30,6 @@ U 2 (#7a21e3)
     public async ValueTask Solve2Test()
     {
         var day = new Day18(_testInput1.Split("\n", StringSplitOptions.TrimEntries));
-        (await day.Solve_2()).Should().Be("result 2");
+        (await day.Solve_2()).Should().Be("952408144115");
     }
 }
