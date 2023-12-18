@@ -38,4 +38,8 @@ public readonly record struct Point2
     public static readonly Point2 Up = new(0, -1);
     public static readonly Point2 Down = new(0, 1);
 
+    public static double Distance(Point2 a, Point2 b) =>
+        Math.Sqrt(Math.Pow(a.X - b.X, 2) + Math.Pow(a.Y - b.Y, 2));
+    public static double DistanceSquared(Point2 a, Point2 b) =>
+        Math.Pow(a.X - b.X, 2) + Math.Pow(a.Y - b.Y, 2);
 }

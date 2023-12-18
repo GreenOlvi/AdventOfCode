@@ -1,28 +1,30 @@
 ﻿namespace AOC2023.Common;
-public sealed class HashGrid<Tile>() where Tile : struct
+public sealed class HashGrid<Tile>(Tile defaultValue = default) where Tile : struct
 {
     private readonly Dictionary<Point2, Tile> _tiles = [];
+    private readonly Tile _defaultValue = defaultValue;
 
-    private HashGrid(IEnumerable<KeyValuePair<Point2, Tile>> tiles) : this()
+    private HashGrid(IEnumerable<KeyValuePair<Point2, Tile>> tiles, Tile defaultValue = default)
+        : this(defaultValue)
     {
         _tiles = tiles.ToDictionary();
     }
 
     public Tile this[(long x, long y) p]
     {
-        get => _tiles.TryGetValue(new Point2(p), out var tile) ? tile : default;
+        get => _tiles.TryGetValue(new Point2(p), out var tile) ? tile : _defaultValue;
         set => _tiles[new Point2(p)] = value;
     }
 
     public Tile this[(int x, int y) p]
     {
-        get => _tiles.TryGetValue(new Point2(p), out var tile) ? tile : default;
+        get => _tiles.TryGetValue(new Point2(p), out var tile) ? tile : _defaultValue;
         set => _tiles[new Point2(p)] = value;
     }
 
     public Tile this[Point2 p]
     {
-        get => _tiles.TryGetValue(p, out var tile) ? tile : default;
+        get => _tiles.TryGetValue(p, out var tile) ? tile : _defaultValue;
         set => _tiles[p] = value;
     }
 
@@ -42,7 +44,7 @@ public sealed class HashGrid<Tile>() where Tile : struct
 
     public Box GetSurroundingBox() => new(new Point2(MinX, MinY), new Point2(MaxX, MaxY));
 
-    public HashGrid<Tile> Clone() => new(_tiles);
+    public HashGrid<Tile> Clone() => new(_tiles, _defaultValue);
 }
 
 public static class HashGridExtensions
@@ -55,15 +57,54 @@ public static class HashGridExtensions
             for (var x = topLeft.X; x <= bottomRight.X; x++)
             {
                 var p = new Point2(x, y);
-                var ch = tileToChar(p, grid[p]);
-                sb.Append(ch);
+                sb.Append(tileToChar(p, grid[p]));
             }
             sb.AppendLine();
         }
         return sb.ToString();
     }
+
+    public static string Draw<T>(this HashGrid<T> grid, Func<Point2, T, string> tileToStr, Point2 topLeft, Point2 bottomRight) where T : struct
+    {
+        var sb = new StringBuilder();
+        for (var y = topLeft.Y; y <= bottomRight.Y; y++)
+        {
+            for (var x = topLeft.X; x <= bottomRight.X; x++)
+            {
+                var p = new Point2(x, y);
+                sb.Append(tileToStr(p, grid[p]));
+            }
+            sb.AppendLine();
+        }
+        return sb.ToString();
+    }
+
+    public static void Print<T>(this HashGrid<T> grid, Func<Point2, T, (ConsoleColor?, string)> tileToStr, Point2 topLeft, Point2 bottomRight) where T : struct
+    {
+        var defaultColor = Console.ForegroundColor;
+
+        Console.WriteLine();
+        for (var y = topLeft.Y; y <= bottomRight.Y; y++)
+        {
+            for (var x = topLeft.X; x <= bottomRight.X; x++)
+            {
+                var p = new Point2(x, y);
+                var colStr = tileToStr(p, grid[p]);
+                Console.ForegroundColor = colStr.Item1 ?? defaultColor;
+                Console.Write(colStr.Item2);
+            }
+            Console.WriteLine();
+        }
+
+        Console.ForegroundColor = defaultColor;
+    }
+
+
     public static string Draw<T>(this HashGrid<T> grid, Func<T, char> tileToChar, Point2 topLeft, Point2 bottomRight) where T : struct =>
         Draw(grid, (_, t) => tileToChar(t), topLeft, bottomRight);
+
+    public static string Draw<T>(this HashGrid<T> grid, Func<T, string> tileToStr, Point2 topLeft, Point2 bottomRight) where T : struct =>
+        Draw(grid, (_, t) => tileToStr(t), topLeft, bottomRight);
 
     public static string Draw<T>(this HashGrid<T> grid, Func<T, char> tileToChar) where T : struct =>
         grid.Draw(tileToChar, grid.TopLeft - Point2.One, grid.BottomRight + Point2.One);
