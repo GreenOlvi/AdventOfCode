@@ -1,4 +1,6 @@
-﻿internal class Program
+﻿using Spectre.Console;
+
+internal class Program
 {
     private static readonly Action<SolverConfiguration> _solverConfig = c =>
     {
