@@ -1,8 +1,4 @@
-﻿
-
-using System.Reflection.Metadata.Ecma335;
-
-namespace AOC2023.Puzzles;
+﻿namespace AOC2023.Puzzles;
 public partial class Day19 : CustomBaseDay
 {
     private readonly FlowDefinition[] _flows;
@@ -48,6 +44,15 @@ public partial class Day19 : CustomBaseDay
                     throw new InvalidDataException(s);
                 }
 
+                var category = match.Groups["category"].Value switch
+                {
+                    "x" => Category.X,
+                    "m" => Category.M,
+                    "a" => Category.A,
+                    "s" => Category.S,
+                    _ => throw new InvalidDataException(),
+                };
+
                 var op = match.Groups["op"].Value switch
                 {
                     ">" => Op.GreaterThan,
@@ -57,7 +62,7 @@ public partial class Day19 : CustomBaseDay
 
                 var val = match.Groups["value"].Value.ToInt();
 
-                return new Step(match.Groups["category"].Value, op, val, match.Groups["destination"].Value);
+                return new Step(category, op, val, match.Groups["destination"].Value);
             });
 
         return new FlowDefinition(name)
@@ -125,7 +130,131 @@ public partial class Day19 : CustomBaseDay
 
     public override ValueTask<string> Solve_2()
     {
-        return "result 2".ToResult();
+        var flows = _flows.ToDictionary(f => f.Name);
+
+        var queue = new Queue<(string, PartRange)>();
+
+        var fullRange = new Range(1, 4000);
+        queue.Enqueue(("in", new PartRange(fullRange, fullRange, fullRange, fullRange)));
+
+        var accepted = new List<PartRange>();
+
+        while (queue.Count > 0)
+        {
+            var (flowName, range) = queue.Dequeue();
+            if (flowName == "A" || flowName == "R")
+            {
+                if (flowName == "A")
+                {
+                    accepted.Add(range);
+                }
+                continue;
+            }
+
+            var flow = flows[flowName];
+            foreach (var step in flow.Steps)
+            {
+                PartRange match;
+                (match, range) = range.Split(step);
+                if (match.Count > 0)
+                {
+                    queue.Enqueue((step.Destination, match));
+                }
+
+                if (range.Count == 0)
+                {
+                    break;
+                }
+            }
+
+            if (range.Count > 0)
+            {
+                queue.Enqueue((flow.Fallback, range));
+            }
+        }
+
+        var t = new PartRange(new Range(1, 4000), new Range(2090, 4000), new Range(2006, 4000), new Range(1, 1351));
+
+        return accepted.Sum(r => r.Count).ToResult();
+    }
+
+    private readonly record struct Range(int From, int To)
+    {
+        public static readonly Range Empty = new(0, -1);
+        public long Count => To - From + 1;
+
+        public (Range Match, Range NoMatch) Split(Op op, int x)
+        {
+            if (op == Op.GreaterThan)
+            {
+                if (x < From)
+                {
+                    return (Empty, this);
+                }
+                else if (x < To)
+                {
+                    return (new Range(x + 1, To), new Range(From, x));
+                }
+                else
+                {
+                    return (this, Empty);
+                }
+            }
+            else
+            {
+                if (x <= From)
+                {
+                    return (Empty, this);
+                }
+                else if (x <= To)
+                {
+                    return (new Range(From, x - 1), new Range(x, To));
+                }
+                else
+                {
+                    return (this, Empty);
+                }
+            }
+        }
+
+        public override string ToString() => $"{From}-{To}";
+    }
+
+    private readonly record struct PartRange(Range X, Range M, Range A, Range S)
+    {
+        public long Count => X.Count * M.Count * A.Count * S.Count;
+        public (PartRange Match, PartRange NoMatch) Split(Step step)
+        {
+            switch (step.Category)
+            {
+                case Category.X:
+                    {
+                        var (y, n) = X.Split(step.Op, step.Value);
+                        return (new PartRange(y, M, A, S), new PartRange(n, M, A, S));
+                    }
+
+                case Category.M:
+                    {
+                        var (y, n) = M.Split(step.Op, step.Value);
+                        return (new PartRange(X, y, A, S), new PartRange(X, n, A, S));
+                    }
+
+                case Category.A:
+                    {
+                        var (y, n) = A.Split(step.Op, step.Value);
+                        return (new PartRange(X, M, y, S), new PartRange(X, M, n, S));
+                    }
+
+                case Category.S:
+                    {
+                        var (y, n) = S.Split(step.Op, step.Value);
+                        return (new PartRange(X, M, A, y), new PartRange(X, M, A, n));
+                    }
+                default:
+                    throw new InvalidOperationException();
+            }
+        }
+        public override string ToString() => $"{{x={X},m={M},a={A},s={S}}}";
     }
 
     private sealed class Flow(FlowDefinition definition)
@@ -155,10 +284,10 @@ public partial class Day19 : CustomBaseDay
 
                 Func<Part, int> catFunc = step.Category switch
                 {
-                    "x" => X,
-                    "m" => M,
-                    "a" => A,
-                    "s" => S,
+                    Category.X => X,
+                    Category.M => M,
+                    Category.A => A,
+                    Category.S => S,
                     _ => throw new InvalidOperationException(),
                 };
 
@@ -197,7 +326,7 @@ public partial class Day19 : CustomBaseDay
             $"{Name}{{{string.Join(',', Steps.Select(s => s.ToString()))},{Fallback}}}";
     }
 
-    private readonly record struct Step(string Category, Op Op, int Value, string Destination)
+    private readonly record struct Step(Category Category, Op Op, int Value, string Destination)
     {
         public override string ToString()
         {
@@ -216,6 +345,15 @@ public partial class Day19 : CustomBaseDay
         None = 0,
         LessThan,
         GreaterThan,
+    }
+
+    private enum Category
+    {
+        None = 0,
+        X,
+        M,
+        A,
+        S
     }
 
     [GeneratedRegex(@"^(?<name>\w+)\{(?<steps>.+)\}$")]
