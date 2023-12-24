@@ -91,7 +91,7 @@ public static class Utils
 
     public static ValueTask<string> ToResult<T>(this T value) => new(value?.ToString() ?? "<null>");
 
-    public static IEnumerable<(T, T)> EachPair<T>(IEnumerable<T> items)
+    public static IEnumerable<(T, T)> EachPair<T>(this IEnumerable<T> items)
     {
         var p = items.ToArray();
         for (var i = 0; i < p.Length - 1; i++)
