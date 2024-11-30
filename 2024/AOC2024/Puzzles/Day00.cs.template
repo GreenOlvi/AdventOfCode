@@ -1,0 +1,26 @@
+namespace AOC2024.Puzzles;
+
+public class $DAY : CustomBaseProblem<string>
+{
+    private readonly string[] _lines;
+
+    public $DAY()
+    {
+        _lines = ReadLinesFromFile().ToArray();
+    }
+
+    public $DAY(IEnumerable<string> lines)
+    {
+        _lines = lines.ToArray();
+    }
+
+    public override string Solve1()
+    {
+        return "result 1";
+    }
+
+    public override string Solve2()
+    {
+        return "result 2";
+    }
+}
