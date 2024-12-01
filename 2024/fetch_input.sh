@@ -7,7 +7,7 @@ inputs_dir="AOC2024/Inputs"
 
 echo "Fetching for day $d"
 
-url="https://adventofcode.com/2023/day/$d/input"
+url="https://adventofcode.com/2024/day/$d/input"
 echo "Url=$url"
 
 mkdir -p $inputs_dir

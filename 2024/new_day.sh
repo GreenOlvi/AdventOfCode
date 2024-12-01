@@ -5,6 +5,7 @@ if [ -z $1 ]; then d=$(date -u +%d); else d=$1; fi
 d=$(($d+0));
 puzzles_dir="AOC2024/Puzzles/"
 tests_dir="AOC2024Tests/Puzzles/"
+inputs_dir="AOC2024/Inputs/"
 
 printf -v padded "%02d" $d
 export DAY="Day$padded"
@@ -16,5 +17,5 @@ else
 
     cat "$puzzles_dir/Day00.cs.template" | envsubst > "$puzzles_dir/$DAY.cs"
     cat "$tests_dir/Day00Test.cs.template" | envsubst > "$tests_dir/${DAY}Test.cs"
-    touch "AOC2024/Inputs/$padded.txt"
+    touch "$inputs_dir/$padded.txt"
 fi

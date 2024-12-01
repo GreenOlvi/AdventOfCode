@@ -2,9 +2,9 @@
 
 internal class Program
 {
-    private const string InputsPath = "../inputs/";
+    private const string InputsPath = "Inputs/";
 
-    private static readonly Action<SolverConfiguration> _solverConfig = c =>
+    private static readonly Action<SolverConfiguration> _solverConfig = static c =>
     {
         c.ClearConsole = false;
         c.ShowConstructorElapsedTime = true;
@@ -43,7 +43,7 @@ internal class Program
             return false;
         }
 
-        if (day < 0 || day > 25)
+        if (day > 25)
         {
             error = "Day should be a number between [1-25]";
             return false;
