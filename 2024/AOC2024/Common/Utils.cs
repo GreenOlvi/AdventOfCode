@@ -91,6 +91,8 @@ public static class Utils
 
     public static ValueTask<string> ToResult<T>(this T value) => new(value?.ToString() ?? "<null>");
 
+    public static IEnumerable<(T, T)> Pairwise<T>(this IEnumerable<T> items) => items.Zip(items.Skip(1));
+
     public static IEnumerable<(T, T)> EachPair<T>(this IEnumerable<T> items)
     {
         var p = items.ToArray();
