@@ -1,6 +1,6 @@
 namespace AOC2024.Puzzles;
 
-public class $DAY : CustomBaseProblem<string>
+public class $DAY : CustomBaseProblem<long>
 {
     private readonly string[] _lines;
 
@@ -14,13 +14,13 @@ public class $DAY : CustomBaseProblem<string>
         _lines = lines.ToArray();
     }
 
-    public override string Solve1()
+    public override long Solve1()
     {
-        return "result 1";
+        return default;
     }
 
-    public override string Solve2()
+    public override long Solve2()
     {
-        return "result 2";
+        return default;
     }
 }
