@@ -5,6 +5,10 @@ public readonly record struct Box(Point2 TopLeft, Point2 BottomRight)
     public long Width => BottomRight.X - TopLeft.X + 1;
     public long Height => BottomRight.Y - TopLeft.Y + 1;
 
+    public Box(long x1, long y1, long x2, long y2) : this(new Point2(x1, y1), new Point2(x2, y2))
+    {
+    }
+
     public bool IsInside(Point2 point) =>
         TopLeft.X <= point.X &&
         TopLeft.Y <= point.Y &&

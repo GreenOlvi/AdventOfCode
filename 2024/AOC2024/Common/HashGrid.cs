@@ -1,8 +1,10 @@
-﻿namespace AOC2024.Common;
-public sealed class HashGrid<TTile>(TTile defaultValue = default) where TTile : struct
+﻿using System.Collections;
+
+namespace AOC2024.Common;
+
+public sealed class HashGrid<TTile>(TTile defaultValue = default) : IEnumerable<(Point2 Position, TTile Tile)> where TTile : struct
 {
     private readonly Dictionary<Point2, TTile> _tiles = [];
-    private readonly TTile _defaultValue = defaultValue;
 
     private HashGrid(IEnumerable<KeyValuePair<Point2, TTile>> tiles, TTile defaultValue = default)
         : this(defaultValue)
@@ -12,19 +14,19 @@ public sealed class HashGrid<TTile>(TTile defaultValue = default) where TTile : 
 
     public TTile this[(long x, long y) p]
     {
-        get => _tiles.TryGetValue(new Point2(p), out var tile) ? tile : _defaultValue;
+        get => _tiles.TryGetValue(new Point2(p), out var tile) ? tile : Default;
         set => _tiles[new Point2(p)] = value;
     }
 
     public TTile this[(int x, int y) p]
     {
-        get => _tiles.TryGetValue(new Point2(p), out var tile) ? tile : _defaultValue;
+        get => _tiles.TryGetValue(new Point2(p), out var tile) ? tile : Default;
         set => _tiles[new Point2(p)] = value;
     }
 
     public TTile this[Point2 p]
     {
-        get => _tiles.TryGetValue(p, out var tile) ? tile : _defaultValue;
+        get => _tiles.TryGetValue(p, out var tile) ? tile : Default;
         set => _tiles[p] = value;
     }
 
@@ -38,17 +40,25 @@ public sealed class HashGrid<TTile>(TTile defaultValue = default) where TTile : 
 
     public Box Box => new(TopLeft, BottomRight);
 
-    public IEnumerable<(Point2, TTile)> Where(Func<(Point2, TTile), bool> predicate) =>
+    public TTile Default { get; } = defaultValue;
+
+    public IEnumerable<(Point2 Position, TTile Tile)> Where(Func<(Point2 Position, TTile Tile), bool> predicate) =>
         _tiles.Select(static kv => (Position: kv.Key, Tile: kv.Value))
             .Where(predicate);
 
     public IEnumerable<Point2> FindTiles(Func<TTile, bool> predicate) =>
-        Where(p => predicate(p.Item2))
-            .Select(p => p.Item1);
+        Where(p => predicate(p.Tile))
+            .Select(p => p.Position);
 
     public Box GetSurroundingBox() => new(new Point2(MinX, MinY), new Point2(MaxX, MaxY));
 
-    public HashGrid<TTile> Clone() => new(_tiles, _defaultValue);
+    public HashGrid<TTile> Clone() => new(_tiles, Default);
+
+    public IEnumerator<(Point2 Position, TTile Tile)> GetEnumerator() =>
+        _tiles.Where(t => !t.Value.Equals(Default))
+            .Select(kv => (kv.Key, kv.Value))
+            .GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }
 
 public static class HashGridExtensions

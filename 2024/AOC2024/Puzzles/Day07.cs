@@ -1,4 +1,3 @@
-
 namespace AOC2024.Puzzles;
 
 public class Day07 : CustomBaseProblem<long>
