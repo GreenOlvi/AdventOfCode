@@ -3,11 +3,17 @@ using System.Collections.Frozen;
 
 namespace AOC2024.Common;
 
-public interface IHashGrid<TTile> : IEnumerable<(Point2 Position, TTile Tile)> where TTile : struct
+public interface IHashGrid<TPoint, TTile> : IEnumerable<(TPoint Position, TTile Tile)> where TPoint : struct where TTile : struct
+{
+    TTile this[TPoint p] { get; set; }
+    TTile DefaultTile { get; }
+    IEnumerable<Point2> FindTiles(Func<TTile, bool> predicate);
+}
+
+public interface IHashGrid2<TTile> : IHashGrid<Point2, TTile> where TTile : struct
 {
     TTile this[(long x, long y) p] { get; set; }
     TTile this[(int x, int y) p] { get; set; }
-    TTile this[Point2 p] { get; set; }
 
     long MaxY { get; }
     long MinY { get; }
@@ -16,13 +22,11 @@ public interface IHashGrid<TTile> : IEnumerable<(Point2 Position, TTile Tile)> w
     Point2 TopLeft { get; }
     Point2 BottomRight { get; }
     Box Box { get; }
-    TTile DefaultTile { get; }
 
-    IEnumerable<Point2> FindTiles(Func<TTile, bool> predicate);
     Box GetSurroundingBox();
 }
 
-public sealed class HashGrid<TTile>(TTile defaultValue = default) : IHashGrid<TTile> where TTile : struct
+public sealed class HashGrid<TTile>(TTile defaultValue = default) : IHashGrid2<TTile> where TTile : struct
 {
     private readonly Dictionary<Point2, TTile> _tiles = [];
 
@@ -85,13 +89,12 @@ public sealed class HashGrid<TTile>(TTile defaultValue = default) : IHashGrid<TT
     public FrozenHashGrid<TTile> ToFrozen() => new(_tiles, DefaultTile);
 
     public IEnumerator<(Point2 Position, TTile Tile)> GetEnumerator() =>
-        _tiles.Where(t => !t.Value.Equals(DefaultTile))
-            .Select(kv => (kv.Key, kv.Value))
-            .GetEnumerator();
+        _tiles.Select(static kv => (kv.Key, kv.Value)).GetEnumerator();
+
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }
 
-public sealed class FrozenHashGrid<TTile> : IHashGrid<TTile> where TTile : struct
+public sealed class FrozenHashGrid<TTile> : IHashGrid2<TTile> where TTile : struct
 {
     private readonly FrozenDictionary<Point2, TTile> _tiles;
 
@@ -150,17 +153,15 @@ public sealed class FrozenHashGrid<TTile> : IHashGrid<TTile> where TTile : struc
 
     public Box GetSurroundingBox() => new(new Point2(MinX, MinY), new Point2(MaxX, MaxY));
 
-
     public IEnumerator<(Point2 Position, TTile Tile)> GetEnumerator() =>
-        _tiles.Where(t => !t.Value.Equals(DefaultTile))
-            .Select(kv => (kv.Key, kv.Value))
-            .GetEnumerator();
+        _tiles.Select(static kv => (kv.Key, kv.Value)).GetEnumerator();
+
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }
 
 public static class HashGridExtensions
 {
-    public static string Draw<T>(this IHashGrid<T> grid, Func<Point2, T, char> tileToChar, Point2 topLeft, Point2 bottomRight) where T : struct
+    public static string Draw<T>(this IHashGrid2<T> grid, Func<Point2, T, char> tileToChar, Point2 topLeft, Point2 bottomRight) where T : struct
     {
         var sb = new StringBuilder();
         for (var y = topLeft.Y; y <= bottomRight.Y; y++)
@@ -175,7 +176,7 @@ public static class HashGridExtensions
         return sb.ToString();
     }
 
-    public static string Draw<T>(this IHashGrid<T> grid, Func<Point2, T, string> tileToStr, Point2 topLeft, Point2 bottomRight) where T : struct
+    public static string Draw<T>(this IHashGrid2<T> grid, Func<Point2, T, string> tileToStr, Point2 topLeft, Point2 bottomRight) where T : struct
     {
         var sb = new StringBuilder();
         for (var y = topLeft.Y; y <= bottomRight.Y; y++)
@@ -190,7 +191,7 @@ public static class HashGridExtensions
         return sb.ToString();
     }
 
-    public static void Print<T>(this IHashGrid<T> grid, Func<Point2, T, (ConsoleColor?, string)> tileToStr, Point2 topLeft, Point2 bottomRight) where T : struct
+    public static void Print<T>(this IHashGrid2<T> grid, Func<Point2, T, (ConsoleColor?, string)> tileToStr, Point2 topLeft, Point2 bottomRight) where T : struct
     {
         var defaultColor = Console.ForegroundColor;
 
@@ -211,19 +212,19 @@ public static class HashGridExtensions
     }
 
 
-    public static string Draw<T>(this IHashGrid<T> grid, Func<T, char> tileToChar, Point2 topLeft, Point2 bottomRight) where T : struct =>
+    public static string Draw<T>(this IHashGrid2<T> grid, Func<T, char> tileToChar, Point2 topLeft, Point2 bottomRight) where T : struct =>
         Draw(grid, (_, t) => tileToChar(t), topLeft, bottomRight);
 
-    public static string Draw<T>(this IHashGrid<T> grid, Func<T, string> tileToStr, Point2 topLeft, Point2 bottomRight) where T : struct =>
+    public static string Draw<T>(this IHashGrid2<T> grid, Func<T, string> tileToStr, Point2 topLeft, Point2 bottomRight) where T : struct =>
         Draw(grid, (_, t) => tileToStr(t), topLeft, bottomRight);
 
-    public static string Draw<T>(this IHashGrid<T> grid, Func<T, char> tileToChar) where T : struct =>
+    public static string Draw<T>(this IHashGrid2<T> grid, Func<T, char> tileToChar) where T : struct =>
         grid.Draw(tileToChar, grid.TopLeft - Point2.One, grid.BottomRight + Point2.One);
 
-    public static string Draw<T>(this IHashGrid<T> grid, IDictionary<T, char> tileToChar, Point2 topLeft, Point2 bottomRight) where T : struct =>
+    public static string Draw<T>(this IHashGrid2<T> grid, IDictionary<T, char> tileToChar, Point2 topLeft, Point2 bottomRight) where T : struct =>
         Draw(grid, t => tileToChar[t], topLeft, bottomRight);
 
-    public static string Draw<T>(this IHashGrid<T> grid, IDictionary<T, char> tileChars) where T : struct =>
+    public static string Draw<T>(this IHashGrid2<T> grid, IDictionary<T, char> tileChars) where T : struct =>
         Draw(grid, t => tileChars[t]);
 
     private static readonly Dictionary<bool, char> _boolTileChars = new()
@@ -232,9 +233,9 @@ public static class HashGridExtensions
         [true] = '#',
     };
 
-    public static string Draw(this IHashGrid<bool> grid) => Draw(grid, _boolTileChars);
+    public static string Draw(this IHashGrid2<bool> grid) => Draw(grid, _boolTileChars);
 
-    public static string Draw(this IHashGrid<char> grid) => Draw(grid, static c => c == '\0' ? ' ' : c);
-    public static string Draw(this IHashGrid<char> grid, Point2 topLeft, Point2 bottomRight) =>
+    public static string Draw(this IHashGrid2<char> grid) => Draw(grid, static c => c == '\0' ? ' ' : c);
+    public static string Draw(this IHashGrid2<char> grid, Point2 topLeft, Point2 bottomRight) =>
         Draw(grid, static c => c == '\0' ? ' ' : c, topLeft, bottomRight);
 }

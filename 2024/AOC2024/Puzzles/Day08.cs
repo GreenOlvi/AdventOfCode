@@ -3,7 +3,7 @@ namespace AOC2024.Puzzles;
 
 public class Day08 : CustomBaseProblem<long>
 {
-    private readonly HashGrid<char> _grid;
+    private readonly IHashGrid2<char> _grid;
     private readonly Box _bounds;
 
     public Day08()
@@ -18,7 +18,7 @@ public class Day08 : CustomBaseProblem<long>
 
     private static bool IsFrequency(char c) => c is (>= 'a' and <= 'z') or (>= 'A' and <= 'Z') or (>= '0' and <= '9');
 
-    private static (HashGrid<char>, Box) ParseInput(IEnumerable<string> lines)
+    private static (IHashGrid2<char>, Box) ParseInput(IEnumerable<string> lines)
     {
         var grid = new HashGrid<char>();
         var maxX = 0;
