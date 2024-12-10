@@ -88,6 +88,8 @@ public sealed class HashGrid<TTile>(TTile defaultValue = default) : IHashGrid2<T
     public HashGrid<TTile> Clone() => new(_tiles, DefaultTile);
     public FrozenHashGrid<TTile> ToFrozen() => new(_tiles, DefaultTile);
 
+    // TODO: Make enumerator work for default values
+
     public IEnumerator<(Point2 Position, TTile Tile)> GetEnumerator() =>
         _tiles.Select(static kv => (kv.Key, kv.Value)).GetEnumerator();
 
