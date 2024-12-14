@@ -63,15 +63,20 @@ public static class Utils
         return Math.Abs(a);
     }
 
-    public static long LeastCommonMultiple(long a, long b)
-    {
-        if ((a == 0) || (b == 0))
-        {
-            return 0;
-        }
+    public static long LeastCommonMultiple(long a, long b) =>
+        (a == 0) || (b == 0)
+            ? 0
+            : Math.Abs(a / GreatestCommonDivisor(a, b) * b);
 
-        return Math.Abs((a / GreatestCommonDivisor(a, b)) * b);
+    public static int Modulo(this int a, int n) => (int)Modulo((long)a, n);
+
+    public static long Modulo(this long a, long n)
+    {
+        var r = a % n;
+        return r < 0 ? r + n : r;
     }
+
+    public static byte Modulo(this byte a, byte n) => (byte)(a % n);
 
     public static IEnumerable<T> Repeat<T>(this IEnumerable<T> items, int count)
     {

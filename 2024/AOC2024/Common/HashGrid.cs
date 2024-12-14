@@ -37,6 +37,13 @@ public sealed class HashGrid<TTile>(TTile defaultValue = default) : IHashGrid2<T
             .ToDictionary();
     }
 
+    public HashGrid(IEnumerable<(Point2 Position, TTile Tile)> tiles, TTile defaultValue = default)
+        : this(defaultValue)
+    {
+        _tiles = tiles.Where(t => !t.Tile.Equals(defaultValue))
+            .ToDictionary();
+    }
+
     public TTile this[(long x, long y) p]
     {
         get => _tiles.TryGetValue(new Point2(p), out var tile) ? tile : DefaultTile;
