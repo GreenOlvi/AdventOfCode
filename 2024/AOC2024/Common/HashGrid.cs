@@ -68,6 +68,10 @@ public sealed class HashGrid<TTile>(TTile defaultValue = default) : IHashGrid2<T
         {
             _tiles[p] = v;
         }
+        else if (_tiles.ContainsKey(p))
+        {
+            _ = _tiles.Remove(p);
+        }
     }
 
     public long MaxY => _tiles.Keys.Max(static p => p.Y);
