@@ -94,7 +94,14 @@ public static class Utils
     public static long Product(this IEnumerable<long> numbers) => numbers.Aggregate(1L, static (a, b) => a * b);
     public static long Product<T>(this IEnumerable<T> elements, Func<T, long> selector) => elements.Select(selector).Product();
 
-    public static ValueTask<string> ToResult<T>(this T value) => new(value?.ToString() ?? "<null>");
+    public static IEnumerable<IEnumerable<T>> SlidingWindow<T>(this IEnumerable<T> input, int n)
+    {
+        var arr = input.ToArray();
+        for (var i = 0; i <= arr.Length - n; i++)
+        {
+            yield return arr.Skip(i).Take(n);
+        }
+    }
 
     public static IEnumerable<(T, T)> Pairwise<T>(this IEnumerable<T> items) => items.Zip(items.Skip(1));
 
