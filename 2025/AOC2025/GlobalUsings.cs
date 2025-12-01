@@ -3,4 +3,4 @@ global using System.Linq;
 global using System.Text;
 global using System.Threading.Tasks;
 global using AoCHelper;
-// global using AOC2025.Common;
+global using AOC2025.Common;
