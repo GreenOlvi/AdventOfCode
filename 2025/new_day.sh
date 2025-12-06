@@ -5,7 +5,7 @@ if [ -z $1 ]; then d=$(date -u +%d); else d=$1; fi
 d=$(($d+0));
 puzzles_dir="AOC2025/Puzzles"
 tests_dir="AOC2025Tests/Puzzles"
-inputs_dir="AOC2025/Inputs"
+inputs_dir="Inputs"
 
 printf -v padded "%02d" $d
 export DAY="Day$padded"

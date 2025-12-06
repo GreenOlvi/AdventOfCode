@@ -3,7 +3,7 @@ namespace AOC2025.Puzzles;
 
 public class Day04 : CustomBaseProblem<long>
 {
-    private readonly HashGrid<bool> _input;
+    private readonly HashGrid<(bool HasRoll, byte Neighbours)> _input;
 
     public Day04()
     {
@@ -15,9 +15,9 @@ public class Day04 : CustomBaseProblem<long>
         _input = ParseInput(lines);
     }
 
-    private static HashGrid<bool> ParseInput(IEnumerable<string> lines)
+    private static HashGrid<(bool, byte)> ParseInput(IEnumerable<string> lines)
     {
-        var grid = new HashGrid<bool>();
+        var grid = new HashGrid<(bool HasRoll, byte Neighbours)>();
 
         var y = 0;
         foreach (var line in lines)
@@ -28,19 +28,20 @@ public class Day04 : CustomBaseProblem<long>
                 if (c == '@')
                 {
                     var p = new Point2(x, y);
-                    grid[p] = true;
+                    grid[p] = (true, 0);
                 }
                 x++;
             }
             y++;
         }
 
-        return grid;
-    }
+        foreach (var (pos, _) in grid.Where(r => r.Tile.HasRoll))
+        {
+            var n = (byte)GetAdjacent(pos).Count(p => grid[p].HasRoll);
+            grid[pos] = (true, n);
+        }
 
-    public override long Solve1()
-    {
-        return _input.Where(t => GetAdjacent(t.Position).Where(a => _input[a]).Count() < 4).Count();
+        return grid;
     }
 
     private static IEnumerable<Point2> GetAdjacent(Point2 p) => [
@@ -54,14 +55,49 @@ public class Day04 : CustomBaseProblem<long>
         p + new Point2(-1, 0),
     ];
 
+    public override long Solve1() => _input.Count(t => t.Tile.Neighbours < 4);
+
     public override long Solve2()
     {
-        return default;
-    }
+        var grid = _input.Clone();
 
-    private enum Tiles
-    {
-        Empty = 0,
-        Roll,
+        var toRemove = grid.Where(t => t.Tile.Neighbours < 4)
+            .Select(t => t.Position)
+            .ToList();
+
+        var allRemoved = 0L;
+
+        while (toRemove.Count > 0)
+        {
+            allRemoved += toRemove.Count;
+
+            foreach (var pos in toRemove)
+            {
+                grid[pos] = (false, 0);
+            }
+
+            var toReduce = toRemove.SelectMany(GetAdjacent)
+                .Where(p => grid[p].HasRoll)
+                .GroupBy(p => p)
+                .Select(g => (Position: g.Key, Count: g.Count()))
+                .ToArray();
+
+            toRemove.Clear();
+
+            foreach (var (pos, count) in toReduce)
+            {
+                var (_, neighbours) = grid[pos];
+
+                var newNeighbours = (byte)(neighbours - count > 0 ? neighbours - count : 0);
+                grid[pos] = (true, newNeighbours);
+
+                if (newNeighbours < 4)
+                {
+                    toRemove.Add(pos);
+                }
+            }
+        }
+
+        return allRemoved;
     }
 }

@@ -3,7 +3,7 @@
 if [ -z $1 ]; then d=$(date -u +%d); else d=$1; fi
 
 d=$(($d+0));
-inputs_dir="AOC2025/Inputs"
+inputs_dir="Inputs"
 
 echo "Fetching for day $d"
 
