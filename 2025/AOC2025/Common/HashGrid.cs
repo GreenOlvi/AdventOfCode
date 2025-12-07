@@ -223,6 +223,8 @@ public static class HashGridExtensions
 
         Console.ForegroundColor = defaultColor;
     }
+    public static void Print<T>(this IHashGrid2<T> grid, Func<Point2, T, (ConsoleColor?, string)> tileToStr) where T : struct =>
+        grid.Print(tileToStr, grid.TopLeft - Point2.One, grid.BottomRight + Point2.One);
 
 
     public static string Draw<T>(this IHashGrid2<T> grid, Func<T, char> tileToChar, Point2 topLeft, Point2 bottomRight) where T : struct =>
