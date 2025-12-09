@@ -4,6 +4,7 @@ public readonly record struct Box(Point2 TopLeft, Point2 BottomRight)
 {
     public long Width => BottomRight.X - TopLeft.X + 1;
     public long Height => BottomRight.Y - TopLeft.Y + 1;
+    public long Area => Width * Height;
 
     public Box(long x1, long y1, long x2, long y2) : this(new Point2(x1, y1), new Point2(x2, y2))
     {
@@ -39,5 +40,13 @@ public readonly record struct Box(Point2 TopLeft, Point2 BottomRight)
             yield return new Point2(BottomRight.X, y);
             yield return new Point2(TopLeft.X, y + 1);
         }
+    }
+
+    public static Box FromTwoPoints(Point2 a, Point2 b)
+    {
+        var (top, bottom) = a.Y < b.Y ? (a.Y, b.Y) : (b.Y, a.Y);
+        var (left, right) = a.X < b.X ? (a.X, b.X) : (b.X, a.X);
+
+        return new Box(new Point2(left, top), new Point2(right, bottom));
     }
 }
