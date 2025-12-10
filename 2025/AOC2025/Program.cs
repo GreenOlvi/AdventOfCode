@@ -4,7 +4,7 @@ namespace AOC2025;
 
 internal static class Program
 {
-    private const string InputsPath = "AOC2025/Inputs/";
+    private const string InputsPath = "Inputs/";
 
     private static readonly Action<SolverConfiguration> _solverConfig = static c =>
     {
