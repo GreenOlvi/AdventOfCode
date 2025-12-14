@@ -26,7 +26,7 @@ public class Day10Test
     [TestCase("[.#.#]", 0x0a)]
     public void ParseLightsTests(string input, int expected)
     {
-        Day10.ParseLights(input).Should().Be((uint)expected);
+        Day10.ParseLights(input).Should().Be(((uint)expected, input.Length - 2));
     }
 
     [TestCase("(0,2,3,4)", 0x1d)]
